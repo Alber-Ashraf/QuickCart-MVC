@@ -40,3 +40,28 @@
 ```bash
 git clone https://github.com/your-username/QuickCart.git
 cd QuickCart
+```
+
+### 2. Configure Database
+
+```bash
+"ConnectionStrings": {
+  "DefaultConnection": "Server=.;Database=QuickCart;Trusted_Connection=True;TrustServerCertificate=True"
+}
+```
+
+---
+
+## Folder Structure
+QuickCart/
+│
+├── Controllers/
+├── Models/
+├── Views/
+├── Data/
+│   └── QuickCartDbContext.cs
+├── wwwroot/
+├── appsettings.json
+└── Program.cs
+
+---
