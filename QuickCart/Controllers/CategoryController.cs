@@ -39,5 +39,33 @@ namespace QuickCart.Controllers
             // If model state is not valid, return the view with the current model
             return View(category);
         }
+
+        public IActionResult Edit(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+            // Fetch the category from the database
+            var categoryFromDb = _db.Categories.Find(id);
+            if (categoryFromDb == null)
+            {
+                return NotFound();
+            }
+            return View(categoryFromDb);
+        }
+        [HttpPost]
+        public IActionResult Edit(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                // Update the category in the database
+                _db.Categories.Update(category);
+                _db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            // If model state is not valid, return the view with the current model
+            return View(category);
+        }
     }
 }
