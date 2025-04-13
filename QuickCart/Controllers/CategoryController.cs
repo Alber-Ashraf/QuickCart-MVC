@@ -26,5 +26,18 @@ namespace QuickCart.Controllers
             // Return the view for creating a new category
             return View();
         }
+        [HttpPost]
+        public IActionResult Create(Category category)
+        {
+            if (ModelState.IsValid)
+            {
+                // Add the new category to the database
+                _db.Categories.Add(category);
+                _db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            // If model state is not valid, return the view with the current model
+            return View(category);
+        }
     }
 }
