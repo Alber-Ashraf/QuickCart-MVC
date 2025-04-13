@@ -67,5 +67,33 @@ namespace QuickCart.Controllers
             // If model state is not valid, return the view with the current model
             return View(category);
         }
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+            // Fetch the category from the database
+            var categoryFromDb = _db.Categories.Find(id);
+            if (categoryFromDb == null)
+            {
+                return NotFound();
+            }
+            return View(categoryFromDb);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        public IActionResult Delete(int id)
+        {
+            var categoryFromDb = _db.Categories.Find(id);
+            if (categoryFromDb == null)
+            {
+                return NotFound();
+            }
+            // Remove the category from the database
+            _db.Categories.Remove(categoryFromDb);
+            _db.SaveChanges();
+            return RedirectToAction("Index");
+        }
     }
 }
