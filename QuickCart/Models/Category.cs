@@ -13,6 +13,7 @@ namespace QuickCart.Models
         [DisplayName("Category Name")]
         public string Name { get; set; }
 
+        [Required]
         [Range(1, 100)]
         [DisplayName("Display Order")]
         public int DisplayOrder { get; set; }
