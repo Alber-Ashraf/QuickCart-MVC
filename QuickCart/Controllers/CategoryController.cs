@@ -21,5 +21,10 @@ namespace QuickCart.Controllers
             // Pass the list to the View
             return View(objCategoryList);
         }
+        public IActionResult Create()
+        {
+            // Return the view for creating a new category
+            return View();
+        }
     }
 }
