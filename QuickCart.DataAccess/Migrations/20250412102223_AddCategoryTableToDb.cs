@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace QuickCart.Migrations
+namespace QuickCart.DataAccess.Migrations
 {
     /// <inheritdoc />
     public partial class AddCategoryTableToDb : Migration

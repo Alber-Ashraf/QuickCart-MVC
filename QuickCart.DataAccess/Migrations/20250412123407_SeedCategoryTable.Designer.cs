@@ -8,11 +8,11 @@ using QuickCart.Data;
 
 #nullable disable
 
-namespace QuickCart.Migrations
+namespace QuickCart.DataAccess.Migrations
 {
     [DbContext(typeof(QuickCartDbContext))]
-    [Migration("20250412102223_AddCategoryTableToDb")]
-    partial class AddCategoryTableToDb
+    [Migration("20250412123407_SeedCategoryTable")]
+    partial class SeedCategoryTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,6 +42,26 @@ namespace QuickCart.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DisplayOrder = 1,
+                            Name = "Action"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DisplayOrder = 2,
+                            Name = "Horror"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DisplayOrder = 3,
+                            Name = "History"
+                        });
                 });
 #pragma warning restore 612, 618
         }

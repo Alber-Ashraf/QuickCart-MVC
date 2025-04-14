@@ -7,7 +7,7 @@ using QuickCart.Data;
 
 #nullable disable
 
-namespace QuickCart.Migrations
+namespace QuickCart.DataAccess.Migrations
 {
     [DbContext(typeof(QuickCartDbContext))]
     partial class QuickCartDbContextModelSnapshot : ModelSnapshot
