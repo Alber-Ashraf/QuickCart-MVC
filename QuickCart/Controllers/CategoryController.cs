@@ -34,6 +34,9 @@ namespace QuickCart.Controllers
                 // Add the new category to the database
                 _db.Categories.Add(category);
                 _db.SaveChanges();
+
+                TempData["success"] = "Category created successfully!";
+                // Redirect to the Index action after successful creation
                 return RedirectToAction("Index");
             }
             // If model state is not valid, return the view with the current model
@@ -62,6 +65,9 @@ namespace QuickCart.Controllers
                 // Update the category in the database
                 _db.Categories.Update(category);
                 _db.SaveChanges();
+
+                TempData["success"] = "Category updated successfully!";
+                // Redirect to the Index action after successful update
                 return RedirectToAction("Index");
             }
             // If model state is not valid, return the view with the current model
@@ -93,6 +99,9 @@ namespace QuickCart.Controllers
             // Remove the category from the database
             _db.Categories.Remove(categoryFromDb);
             _db.SaveChanges();
+
+            TempData["success"] = "Category deleted successfully!";
+            // Redirect to the Index action after successful deletion
             return RedirectToAction("Index");
         }
     }
