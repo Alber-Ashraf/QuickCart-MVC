@@ -51,6 +51,17 @@
     <div class="container my-4 flex-grow-1">
         <main role="main" class="pb-3">
 			<partial name="_Notification" />
+
+            <!-- Splash Screen with Dot Loader -->
+            <div id="preloader">
+                <div class="dot-loader">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <p class="text-white fw-bold mt-4">Loading...</p>
+            </div>
+
             @RenderBody()
         </main>
     </div>

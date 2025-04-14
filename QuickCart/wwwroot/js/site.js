@@ -1,4 +1,5 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
+﻿window.addEventListener("load", function () {
+    setTimeout(function () {
+        document.body.classList.add("loaded");
+    }, 3000); // Delay for 3 seconds
+});
