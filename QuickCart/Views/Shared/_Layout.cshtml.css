@@ -46,3 +46,13 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+/* Dropdown inside dark navbar */
+.dropdown-menu .dropdown-item:hover {
+    background-color: #0d6efd;
+    color: #fff !important;
+}
+
+.dropdown-menu .dropdown-item i {
+    width: 20px;
+}
