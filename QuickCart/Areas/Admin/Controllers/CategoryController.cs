@@ -3,8 +3,9 @@ using QuickCart.Data;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
 
-namespace QuickCart.Controllers
+namespace QuickCart.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
         private readonly ICategoryRepository _categoryRepo;
