@@ -9,7 +9,7 @@ using QuickCart.Models;
 
 namespace QuickCart.DataAccess.Repository
 {
-    class CategoryRepository : Repository<Category>, ICategoryRepository 
+    public class CategoryRepository : Repository<Category>, ICategoryRepository 
     {
         private readonly QuickCartDbContext _db;
         public CategoryRepository(QuickCartDbContext db) : base(db)
