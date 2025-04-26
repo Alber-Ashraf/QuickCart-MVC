@@ -28,6 +28,7 @@
                             <th>💵 Price</th>
                             <th>💸 Price 50+</th>
                             <th>🏷️ Price 100+</th>
+                            <th>🆔 CategoryId</th>
                             <th>⚙️ Actions</th>
                         </tr>
                     </thead>
@@ -42,6 +43,7 @@
                                 <td>@product.Price.ToString("C")</td>
                                 <td>@product.Price50.ToString("C")</td>
                                 <td>@product.Price100.ToString("C")</td>
+                                <td>@product.CategoryId</td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                                         <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">
