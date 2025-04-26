@@ -1,0 +1,68 @@
+﻿@model List<Product>
+
+@{
+    ViewData["Title"] = "Product List";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg rounded-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top-4">
+            <h3 class="mb-0">
+                <i class="bi bi-box-seam-fill me-2"></i> Product List
+            </h3>
+            <a asp-controller="Product" asp-action="Create" class="btn btn-light text-primary fw-bold shadow-sm rounded-pill">
+                <i class="bi bi-plus-circle me-1"></i> Create New Product
+            </a>
+        </div>
+
+        <div class="card-body bg-light rounded-bottom-4">
+            @if (Model.Any())
+            {
+                <table class="table table-bordered table-hover table-striped align-middle text-center mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>📚 Title</th>
+                            <th>✍️ Author</th>
+                            <th>🔢 ISBN</th>
+                            <th>💰 List Price</th>
+                            <th>💵 Price</th>
+                            <th>💸 Price 50+</th>
+                            <th>🏷️ Price 100+</th>
+                            <th>⚙️ Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@product.Title</td>
+                                <td>@product.Author</td>
+                                <td>@product.ISBN</td>
+                                <td>@product.ListPrice.ToString("C")</td>
+                                <td>@product.Price.ToString("C")</td>
+                                <td>@product.Price50.ToString("C")</td>
+                                <td>@product.Price100.ToString("C")</td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                                        <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                            <i class="bi bi-trash3"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info text-center m-0 py-4">
+                    <i class="bi bi-info-circle me-2"></i> No products found. Click "Create New Product" to add one.
+                </div>
+            }
+        </div>
+    </div>
+</div>
