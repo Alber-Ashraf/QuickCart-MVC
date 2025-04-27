@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
 
@@ -18,12 +19,21 @@ namespace QuickCart.Areas.Admin.Controllers
         {
             // Fetch the list of Products from the database
             List<Product> objProductList = _unitOfWork.Product.GetAll().ToList();
-
             // Pass the list to the View
             return View(objProductList);
         }
         public IActionResult Create()
         {
+            // Fetch Category Name and Id
+            IEnumerable<SelectListItem> Category = _unitOfWork.Category.GetAll()
+                .Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
+            
+            ViewBag.CategoryList = Category;
+
             // Return the view for creating a new Product
             return View();
         }
