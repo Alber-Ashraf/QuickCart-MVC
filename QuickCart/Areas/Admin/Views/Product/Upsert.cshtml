@@ -10,11 +10,12 @@
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-header bg-dark text-white text-center rounded-top-4">
                     <h4 class="mb-0">
-                        <i class="bi bi-box-seam me-2"></i> Add New Product
+                        <i class="bi bi-box-seam me-2"></i> @(Model.Product.Id!=0?"Update":"Create") Product
                     </h4>
                 </div>
                 <div class="card-body bg-light rounded-bottom-4">
                     <form asp-action="Create" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Product.Id" />
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
@@ -108,9 +109,18 @@
                                 <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
                                     <i class="bi bi-arrow-left-circle me-1"></i> Back
                                 </a>
-                                <button type="submit" class="btn btn-success px-4 rounded-pill">
+                                @if (Model.Product.Id != 0)
+                                {
+                                    <button type="submit" class="btn btn-success px-4 rounded-pill">
+                                        <i class="bi bi-check-circle me-1"></i> Update
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-success px-4 rounded-pill">\ 
                                     <i class="bi bi-check-circle me-1"></i> Create
-                                </button>
+                                    </button>
+                                }
                             </div>
                         </div>
                     </form>

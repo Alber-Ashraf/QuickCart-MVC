@@ -23,7 +23,7 @@ namespace QuickCart.Areas.Admin.Controllers
             // Pass the list to the View
             return View(objProductList);
         }
-        public IActionResult Create()
+        public IActionResult Upsert(int? id)
         {
             // Fetch Category Name and Id            
             ProductVM productVM = new()
@@ -35,12 +35,19 @@ namespace QuickCart.Areas.Admin.Controllers
                     Value = i.Id.ToString()
                 })
             };
-
-            // Return the view for creating a new Product
-            return View(productVM);
+            if (id == null || id == 0)
+            {
+                // Return the view for creating a new Product
+                return View(productVM);
+            }
+            else
+            {
+                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
+                return View(productVM);
+            }
         }
         [HttpPost]
-        public IActionResult Create(ProductVM productVM)
+        public IActionResult Upsert(ProductVM productVM, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
@@ -61,37 +68,6 @@ namespace QuickCart.Areas.Admin.Controllers
                 });
                 return View(productVM);
             }
-        }
-
-        public IActionResult Edit(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            // Fetch the Product from the database
-            var productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
-            if (productFromDb == null)
-            {
-                return NotFound();
-            }
-            return View(productFromDb);
-        }
-        [HttpPost]
-        public IActionResult Edit(Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                // Update the Product in the database
-                _unitOfWork.Product.Update(product);
-                _unitOfWork.Save();
-
-                TempData["success"] = "Product updated successfully!";
-                // Redirect to the Index action after successful update
-                return RedirectToAction("Index");
-            }
-            // If model state is not valid, return the view with the current model
-            return View(product);
         }
         public IActionResult Delete(int? id)
         {
