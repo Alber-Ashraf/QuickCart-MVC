@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
+using QuickCart.Models.ViewModels;
 
 namespace QuickCart.Areas.Admin.Controllers
 {
@@ -24,34 +25,42 @@ namespace QuickCart.Areas.Admin.Controllers
         }
         public IActionResult Create()
         {
-            // Fetch Category Name and Id
-            IEnumerable<SelectListItem> Category = _unitOfWork.Category.GetAll()
-                .Select(i => new SelectListItem
+            // Fetch Category Name and Id            
+            ProductVM productVM = new()
+            {
+                Product = new Product(),
+                CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
                 {
                     Text = i.Name,
                     Value = i.Id.ToString()
-                });
-            
-            ViewBag.CategoryList = Category;
+                })
+            };
 
             // Return the view for creating a new Product
-            return View();
+            return View(productVM);
         }
         [HttpPost]
-        public IActionResult Create(Product product)
+        public IActionResult Create(ProductVM productVM)
         {
             if (ModelState.IsValid)
             {
                 // Add the new Product to the database
-                _unitOfWork.Product.Add(product);
+                _unitOfWork.Product.Add(productVM.Product);
                 _unitOfWork.Save();
-
                 TempData["success"] = "Product created successfully!";
                 // Redirect to the Index action after successful creation
                 return RedirectToAction("Index");
             }
             // If model state is not valid, return the view with the current model
-            return View(product);
+            else
+            {
+                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
+                return View(productVM);
+            }
         }
 
         public IActionResult Edit(int? id)

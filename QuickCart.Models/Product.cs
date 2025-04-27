@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace QuickCart.Models
 {
@@ -43,6 +44,7 @@ namespace QuickCart.Models
         public double Price100 { get; set; }
 
         public int CategoryId { get; set; }
+        [ValidateNever]
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
 

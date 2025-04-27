@@ -1,4 +1,4 @@
-﻿@model Product
+﻿@model ProductVM
 
 @{
     ViewData["Title"] = "Create Product";
@@ -18,78 +18,86 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input asp-for="Title" class="form-control" placeholder="Title" />
-                                    <label asp-for="Title"><i class="bi bi-type me-2"></i>Title</label>
-                                    <span asp-validation-for="Title" class="text-danger small"></span>
+                                    <input asp-for="Product.Title" class="form-control" placeholder="Title" />
+                                    <label asp-for="Product.Title"><i class="bi bi-type me-2"></i>Title</label>
+                                    <span asp-validation-for="Product.Title" class="text-danger small"></span>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input asp-for="Author" class="form-control" placeholder="Author" />
-                                    <label asp-for="Author"><i class="bi bi-person-lines-fill me-2"></i>Author</label>
-                                    <span asp-validation-for="Author" class="text-danger small"></span>
+                                    <input asp-for="Product.Author" class="form-control" placeholder="Author" />
+                                    <label asp-for="Product.Author"><i class="bi bi-person-lines-fill me-2"></i>Author</label>
+                                    <span asp-validation-for="Product.Author" class="text-danger small"></span>
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <textarea asp-for="Description" class="form-control" style="height: 100px;" placeholder="Description"></textarea>
-                                    <label asp-for="Description"><i class="bi bi-card-text me-2"></i>Description</label>
-                                    <span asp-validation-for="Description" class="text-danger small"></span>
+                                    <textarea asp-for="Product.Description" class="form-control" style="height: 100px;" placeholder="Description"></textarea>
+                                    <label asp-for="Product.Description"><i class="bi bi-card-text me-2"></i>Description</label>
+                                    <span asp-validation-for="Product.Description" class="text-danger small"></span>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input asp-for="ISBN" class="form-control" placeholder="ISBN" />
-                                    <label asp-for="ISBN"><i class="bi bi-upc-scan me-2"></i>ISBN</label>
-                                    <span asp-validation-for="ISBN" class="text-danger small"></span>
+                                    <input asp-for="Product.ISBN" class="form-control" placeholder="ISBN" />
+                                    <label asp-for="Product.ISBN"><i class="bi bi-upc-scan me-2"></i>ISBN</label>
+                                    <span asp-validation-for="Product.ISBN" class="text-danger small"></span>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input asp-for="ListPrice" class="form-control" placeholder="List Price" />
-                                    <label asp-for="ListPrice"><i class="bi bi-tag me-2"></i>List Price</label>
-                                    <span asp-validation-for="ListPrice" class="text-danger small"></span>
+                                    <input asp-for="Product.ListPrice" class="form-control" placeholder="List Price" />
+                                    <label asp-for="Product.ListPrice"><i class="bi bi-tag me-2"></i>List Price</label>
+                                    <span asp-validation-for="Product.ListPrice" class="text-danger small"></span>
                                 </div>
                             </div>
 
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input asp-for="Price" class="form-control" placeholder="Price for 1-50" />
-                                    <label asp-for="Price"><i class="bi bi-cash-stack me-2"></i>Price (1-50)</label>
-                                    <span asp-validation-for="Price" class="text-danger small"></span>
+                                    <input asp-for="Product.Price" class="form-control" placeholder="Price for 1-50" />
+                                    <label asp-for="Product.Price"><i class="bi bi-cash-stack me-2"></i>Price (1-50)</label>
+                                    <span asp-validation-for="Product.Price" class="text-danger small"></span>
                                 </div>
                             </div>
 
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input asp-for="Price50" class="form-control" placeholder="Price for 50+" />
-                                    <label asp-for="Price50"><i class="bi bi-cash me-2"></i>Price (50+)</label>
-                                    <span asp-validation-for="Price50" class="text-danger small"></span>
+                                    <input asp-for="Product.Price50" class="form-control" placeholder="Price for 50+" />
+                                    <label asp-for="Product.Price50"><i class="bi bi-cash me-2"></i>Price (50+)</label>
+                                    <span asp-validation-for="Product.Price50" class="text-danger small"></span>
                                 </div>
                             </div>
 
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input asp-for="Price100" class="form-control" placeholder="Price for 100+" />
-                                    <label asp-for="Price100"><i class="bi bi-currency-dollar me-2"></i>Price (100+)</label>
-                                    <span asp-validation-for="Price100" class="text-danger small"></span>
+                                    <input asp-for="Product.Price100" class="form-control" placeholder="Price for 100+" />
+                                    <label asp-for="Product.Price100"><i class="bi bi-currency-dollar me-2"></i>Price (100+)</label>
+                                    <span asp-validation-for="Product.Price100" class="text-danger small"></span>
                                 </div>
                             </div>
 
-                            <div class="container mt-4 d-flex justify-content-center">
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="Product.ImageURL" class="form-control" placeholder="ImageURL" />
+                                    <label asp-for="Product.ImageURL"><i class="bi bi-image"></i> ImageURL</label>
+                                    <span asp-validation-for="Product.ImageURL" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="container mt-3 d-flex justify-content-center">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <select asp-for="CategoryId" asp-items="ViewBag.CategoryList" class="form-select" placeholder="CategoryId">
+                                        <select asp-for="@Model.Product.CategoryId" asp-items="@Model.CategoryList" class="form-select" placeholder="CategoryId">
                                             <option disabled selected>-- Select Category --</option>
                                         </select>
-                                        <label asp-for="CategoryId">
+                                        <label asp-for="Product.CategoryId">
                                             <i class="bi bi-hash me-2"></i>Category
                                         </label>
-                                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                                        <span asp-validation-for="Product.CategoryId" class="text-danger small"></span>
                                     </div>
                                 </div>
                             </div>
