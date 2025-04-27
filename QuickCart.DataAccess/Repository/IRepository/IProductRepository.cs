@@ -11,6 +11,5 @@ namespace QuickCart.DataAccess.Repository.IRepository
     {
         // Define methods specific to Product repository
         void Update(Product obj);
-        void Save();
     }
 }

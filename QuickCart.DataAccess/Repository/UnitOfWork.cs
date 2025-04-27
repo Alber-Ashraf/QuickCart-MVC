@@ -9,16 +9,20 @@ using QuickCart.Models;
 
 namespace QuickCart.DataAccess.Repository
 {
-    public class ProductRepository : Repository<Product>, IProductRepository
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly QuickCartDbContext _db;
-        public ProductRepository(QuickCartDbContext db) : base(db)
+        public ICategoryRepository Category { get; private set; }
+        public IProductRepository Product { get; private set; }
+        public UnitOfWork(QuickCartDbContext db)
         {
             _db = db;
+            Category = new CategoryRepository(_db);
+            Product = new ProductRepository(_db);
         }
-        public void Update(Product obj)
+        public void Save()
         {
-            _db.Products.Update(obj);
+            _db.SaveChanges();
         }
     }
 }

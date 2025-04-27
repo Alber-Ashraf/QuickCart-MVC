@@ -20,9 +20,5 @@ namespace QuickCart.DataAccess.Repository
         {   
             _db.Categories.Update(obj);
         }
-        public void Save()
-        {
-            _db.SaveChanges();
-        }
     }
 }

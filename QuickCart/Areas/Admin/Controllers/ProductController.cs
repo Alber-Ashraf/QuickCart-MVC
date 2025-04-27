@@ -7,17 +7,17 @@ namespace QuickCart.Areas.Admin.Controllers
     [Area("Admin")]
     public class ProductController : Controller
     {
-        private readonly IProductRepository _productRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProductController(IProductRepository productRepo)
+        public ProductController(IUnitOfWork unitOfWork)
         {
-            _productRepo = productRepo;
+            _unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
         {
             // Fetch the list of Products from the database
-            List<Product> objProductList = _productRepo.GetAll().ToList();
+            List<Product> objProductList = _unitOfWork.Product.GetAll().ToList();
 
             // Pass the list to the View
             return View(objProductList);
@@ -33,8 +33,8 @@ namespace QuickCart.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 // Add the new Product to the database
-                _productRepo.Add(product);
-                _productRepo.Save();
+                _unitOfWork.Product.Add(product);
+                _unitOfWork.Save();
 
                 TempData["success"] = "Product created successfully!";
                 // Redirect to the Index action after successful creation
@@ -51,7 +51,7 @@ namespace QuickCart.Areas.Admin.Controllers
                 return NotFound();
             }
             // Fetch the Product from the database
-            var productFromDb = _productRepo.Get(u => u.Id == id);
+            var productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
             if (productFromDb == null)
             {
                 return NotFound();
@@ -64,8 +64,8 @@ namespace QuickCart.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 // Update the Product in the database
-                _productRepo.Update(product);
-                _productRepo.Save();
+                _unitOfWork.Product.Update(product);
+                _unitOfWork.Save();
 
                 TempData["success"] = "Product updated successfully!";
                 // Redirect to the Index action after successful update
@@ -81,7 +81,7 @@ namespace QuickCart.Areas.Admin.Controllers
                 return NotFound();
             }
             // Fetch the Product from the database
-            var productFromDb = _productRepo.Get(u => u.Id == id);
+            var productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
             if (productFromDb == null)
             {
                 return NotFound();
@@ -92,14 +92,14 @@ namespace QuickCart.Areas.Admin.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult Delete(int id)
         {
-            var productFromDb = _productRepo.Get(u => u.Id == id);
+            var productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
             if (productFromDb == null)
             {
                 return NotFound();
             }
             // Remove the Product from the database
-            _productRepo.Remove(productFromDb);
-            _productRepo.Save();
+            _unitOfWork.Product.Remove(productFromDb);
+            _unitOfWork.Save();
 
             TempData["success"] = "Product deleted successfully!";
             // Redirect to the Index action after successful deletion

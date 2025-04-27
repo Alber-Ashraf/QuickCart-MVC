@@ -8,17 +8,17 @@ namespace QuickCart.Areas.Admin.Controllers
     [Area("Admin")]
     public class CategoryController : Controller
     {
-        private readonly ICategoryRepository _categoryRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryController(ICategoryRepository categoryRepo)
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            _categoryRepo = categoryRepo;
+            _unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
         {
             // Fetch the list of categories from the database
-            List<Category> objCategoryList = _categoryRepo.GetAll().ToList();
+            List<Category> objCategoryList = _unitOfWork.Category.GetAll().ToList();
 
             // Pass the list to the View
             return View(objCategoryList);
@@ -34,8 +34,8 @@ namespace QuickCart.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 // Add the new category to the database
-                _categoryRepo.Add(category);
-                _categoryRepo.Save();
+                _unitOfWork.Category.Add(category);
+                _unitOfWork.Save();
 
                 TempData["success"] = "Category created successfully!";
                 // Redirect to the Index action after successful creation
@@ -52,7 +52,7 @@ namespace QuickCart.Areas.Admin.Controllers
                 return NotFound();
             }
             // Fetch the category from the database
-            var categoryFromDb = _categoryRepo.Get(u=> u.Id==id);
+            var categoryFromDb = _unitOfWork.Category.Get(u=> u.Id==id);
             if (categoryFromDb == null)
             {
                 return NotFound();
@@ -65,8 +65,8 @@ namespace QuickCart.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 // Update the category in the database
-                _categoryRepo.Update(category);
-                _categoryRepo.Save();
+                _unitOfWork.Category.Update(category);
+                _unitOfWork.Save();
 
                 TempData["success"] = "Category updated successfully!";
                 // Redirect to the Index action after successful update
@@ -82,7 +82,7 @@ namespace QuickCart.Areas.Admin.Controllers
                 return NotFound();
             }
             // Fetch the category from the database
-            var categoryFromDb = _categoryRepo.Get(u => u.Id == id);
+            var categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
             if (categoryFromDb == null)
             {
                 return NotFound();
@@ -93,14 +93,14 @@ namespace QuickCart.Areas.Admin.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult Delete(int id)
         {
-            var categoryFromDb = _categoryRepo.Get(u => u.Id == id);
+            var categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
             if (categoryFromDb == null)
             {
                 return NotFound();
             }
             // Remove the category from the database
-            _categoryRepo.Remove(categoryFromDb);
-            _categoryRepo.Save();
+            _unitOfWork.Category.Remove(categoryFromDb);
+            _unitOfWork.Save();
 
             TempData["success"] = "Category deleted successfully!";
             // Redirect to the Index action after successful deletion
