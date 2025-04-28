@@ -81,22 +81,24 @@ namespace QuickCart.Areas.Admin.Controllers
                     productVM.Product.ImageURL = @"\images\products\" + fileName;
                 }
 
-                if (id == null || id == 0)
+                if (productVM.Product.Id == 0) // هنا مش id اللي جاي من URL، بل Id بتاع المنتج نفسه
                 {
-                    // Add the new Product to the database
                     _unitOfWork.Product.Add(productVM.Product);
-                    _unitOfWork.Save();
-                    TempData["success"] = "Product created successfully!";
                 }
                 else
                 {
-                    // Update the existing Product in the database
-                    _unitOfWork.Product.Update(productVM.Product);
-                    _unitOfWork.Save();
-                    TempData["success"] = "Product updated successfully!";
+                    var productFromDb = _unitOfWork.Product.Get(u => u.Id == productVM.Product.Id);
+                    if (productFromDb != null)
+                    {
+                        // Update the existing Product in the database
+                        _unitOfWork.Product.Update(productVM.Product);
+
+                    }
                 }
-                    // Redirect to the Index action after successful update
-                    return RedirectToAction("Index");
+
+                _unitOfWork.Save();
+                TempData["success"] = "Product saved successfully!";
+                return RedirectToAction("Index");
             }
             // If model state is not valid, return the view with the current model
             else
@@ -140,5 +142,19 @@ namespace QuickCart.Areas.Admin.Controllers
             // Redirect to the Index action after successful deletion
             return RedirectToAction("Index");
         }
+
+        // This method is used to get the list of Products in JSON format for DataTables
+        #region ApI Calls
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            // Fetch the list of Products from the database
+            List<Product> objProductList = _unitOfWork.Product.GetAll(includedProperties: "Category").ToList();
+            // Return the list as JSON
+            return Json(new { data = objProductList });
+        }
+        #endregion
+
     }
 }
+

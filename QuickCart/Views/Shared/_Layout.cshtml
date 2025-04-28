@@ -12,6 +12,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css">
+
     <!-- Site-wide Styles -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuickCart.styles.css" asp-append-version="true" />
@@ -93,8 +96,13 @@
         </div>
     </footer>
 
+	<!-- jQuery and Bootstrap JS -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -8,7 +8,7 @@
     <div class="card shadow-lg rounded-4">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top-4">
             <h3 class="mb-0">
-                <i class="bi bi-box-seam-fill me-2"></i> Product List
+                <i class="bi bi-box-seam-fill me-2"></i> Products
             </h3>
             <a asp-controller="Product" asp-action="Upsert" class="btn btn-light text-primary fw-bold shadow-sm rounded-pill">
                 <i class="bi bi-plus-circle me-1"></i> Create New Product
@@ -18,7 +18,7 @@
         <div class="card-body bg-light rounded-bottom-4">
             @if (Model.Any())
             {
-                <table class="table table-bordered table-hover table-striped align-middle text-center mb-0">
+                <table id="tblData" class="table table-bordered table-hover table-striped align-middle text-center mb-0" style="width:100%">
                     <thead class="table-dark">
                         <tr>
                             <th>📚 Title</th>
@@ -30,26 +30,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var product in Model)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@product.Title</td>
-                                <td>@product.Author</td>
-                                <td>@product.ISBN</td>
-                                <td>@product.Price.ToString("C")</td>
-                                <td>@product.Category.Name</td>
-                                <td>
-                                    <div class="d-flex justify-content-center gap-2 flex-wrap">
-                                        <a asp-action="Upsert" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                            <i class="bi bi-pencil-square"></i> Edit
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                                            <i class="bi bi-trash3"></i> Delete
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
+                        <!-- Will be populated by DataTable -->
                     </tbody>
                 </table>
             }
@@ -62,3 +43,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/product.js"></script>
+}
