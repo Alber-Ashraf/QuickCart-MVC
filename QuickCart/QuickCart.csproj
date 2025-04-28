@@ -21,4 +21,8 @@
     <ProjectReference Include="..\QuickCart.Models\QuickCart.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\products\" />
+  </ItemGroup>
+
 </Project>

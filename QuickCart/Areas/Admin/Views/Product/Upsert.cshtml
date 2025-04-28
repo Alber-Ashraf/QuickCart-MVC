@@ -14,7 +14,7 @@
                     </h4>
                 </div>
                 <div class="card-body bg-light rounded-bottom-4">
-                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <form asp-action="Upsert" method="post" enctype="multipart/form-data">
                         <input type="hidden" asp-for="Product.Id" />
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -85,7 +85,7 @@
                                 <label asp-for="Product.ImageURL" class="form-label fw-semibold">
                                     <i class="bi bi-image me-2"></i> Upload Image
                                 </label>
-                                <input asp-for="Product.ImageURL" type="file" class="form-control bg-white" />
+                                <input type="file" name="file" class="form-control bg-white" />
                                 <span asp-validation-for="Product.ImageURL" class="text-danger small"></span>
                             </div>
 
@@ -117,7 +117,7 @@
                                 }
                                 else
                                 {
-                                    <button type="submit" class="btn btn-success px-4 rounded-pill">\ 
+                                    <button type="submit" class="btn btn-success px-4 rounded-pill">
                                     <i class="bi bi-check-circle me-1"></i> Create
                                     </button>
                                 }

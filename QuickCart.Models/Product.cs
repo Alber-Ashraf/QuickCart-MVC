@@ -48,6 +48,7 @@ namespace QuickCart.Models
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
 
+        [Required]
         public string ImageURL { get; set; }
     }
 }
