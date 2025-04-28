@@ -81,7 +81,7 @@ namespace QuickCart.Areas.Admin.Controllers
                     productVM.Product.ImageURL = @"\images\products\" + fileName;
                 }
 
-                if (productVM.Product.Id == 0) // هنا مش id اللي جاي من URL، بل Id بتاع المنتج نفسه
+                if (productVM.Product.Id == 0) 
                 {
                     _unitOfWork.Product.Add(productVM.Product);
                 }
@@ -111,38 +111,7 @@ namespace QuickCart.Areas.Admin.Controllers
                 return View(productVM);
             }
         }
-        public IActionResult Delete(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            // Fetch the Product from the database
-            var productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
-            if (productFromDb == null)
-            {
-                return NotFound();
-            }
-            return View(productFromDb);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        public IActionResult Delete(int id)
-        {
-            var productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
-            if (productFromDb == null)
-            {
-                return NotFound();
-            }
-            // Remove the Product from the database
-            _unitOfWork.Product.Remove(productFromDb);
-            _unitOfWork.Save();
-
-            TempData["success"] = "Product deleted successfully!";
-            // Redirect to the Index action after successful deletion
-            return RedirectToAction("Index");
-        }
-
+        
         // This method is used to get the list of Products in JSON format for DataTables
         #region ApI Calls
         [HttpGet]
@@ -152,6 +121,28 @@ namespace QuickCart.Areas.Admin.Controllers
             List<Product> objProductList = _unitOfWork.Product.GetAll(includedProperties: "Category").ToList();
             // Return the list as JSON
             return Json(new { data = objProductList });
+        }
+
+        // This method is used to get the details of a specific Product for editing
+        [HttpDelete]
+        public IActionResult Delete(int? id)
+        {
+            var productToBeDeleted = _unitOfWork.Product.Get(u => u.Id == id);
+            if (productToBeDeleted == null)
+            {
+                return Json(new { sucess = false, massege = "Erorr While Deleting" });
+            }
+
+            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, productToBeDeleted.ImageURL.TrimStart('\\'));
+            if (System.IO.File.Exists(oldImagePath))
+            {
+                System.IO.File.Delete(oldImagePath);
+            }
+            // Remove the Product from the database
+            _unitOfWork.Product.Remove(productToBeDeleted);
+            _unitOfWork.Save();
+
+            return Json(new { sucess = true, massege = "Delete Sucsess" });
         }
         #endregion
 
