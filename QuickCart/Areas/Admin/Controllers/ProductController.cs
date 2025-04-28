@@ -50,7 +50,7 @@ namespace QuickCart.Areas.Admin.Controllers
             }
         }
         [HttpPost]
-        public IActionResult Upsert(ProductVM productVM, IFormFile? file)
+        public IActionResult Upsert(ProductVM productVM, IFormFile? file, int? id)
         {
             // Check if the file is not null and has a valid size
             if (ModelState.IsValid)
@@ -63,9 +63,14 @@ namespace QuickCart.Areas.Admin.Controllers
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                     string productPath = Path.Combine(wwwRootPath, @"images\products");
 
-                    if (!Directory.Exists(productPath))
+                    if (!string.IsNullOrEmpty(productVM.Product.ImageURL))
                     {
-                        Directory.CreateDirectory(productPath);
+                        // If the product already has an image, delete the old image
+                        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageURL.TrimStart('\\'));
+                        if (System.IO.File.Exists(oldImagePath))
+                        {
+                            System.IO.File.Delete(oldImagePath);
+                        }
                     }
 
                     using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
@@ -76,12 +81,22 @@ namespace QuickCart.Areas.Admin.Controllers
                     productVM.Product.ImageURL = @"\images\products\" + fileName;
                 }
 
-                // Add the new Product to the database
-                _unitOfWork.Product.Add(productVM.Product);
-                _unitOfWork.Save();
-                TempData["success"] = "Product created successfully!";
-                // Redirect to the Index action after successful creation
-                return RedirectToAction("Index");
+                if (id == null || id == 0)
+                {
+                    // Add the new Product to the database
+                    _unitOfWork.Product.Add(productVM.Product);
+                    _unitOfWork.Save();
+                    TempData["success"] = "Product created successfully!";
+                }
+                else
+                {
+                    // Update the existing Product in the database
+                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Save();
+                    TempData["success"] = "Product updated successfully!";
+                }
+                    // Redirect to the Index action after successful update
+                    return RedirectToAction("Index");
             }
             // If model state is not valid, return the view with the current model
             else

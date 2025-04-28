@@ -16,6 +16,7 @@
                 <div class="card-body bg-light rounded-bottom-4">
                     <form asp-action="Upsert" method="post" enctype="multipart/form-data">
                         <input type="hidden" asp-for="Product.Id" />
+                        <input type="hidden" asp-for="Product.ImageURL" />
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
