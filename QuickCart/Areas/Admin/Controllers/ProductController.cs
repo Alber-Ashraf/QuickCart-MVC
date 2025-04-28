@@ -22,7 +22,7 @@ namespace QuickCart.Areas.Admin.Controllers
         public IActionResult Index()
         {
             // Fetch the list of Products from the database
-            List<Product> objProductList = _unitOfWork.Product.GetAll().ToList();
+            List<Product> objProductList = _unitOfWork.Product.GetAll(includedProperties:"Category").ToList();
             // Pass the list to the View
             return View(objProductList);
         }
