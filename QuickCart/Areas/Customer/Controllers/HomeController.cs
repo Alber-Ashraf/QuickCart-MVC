@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
 
 namespace QuickCart.Areas.Customer.Controllers;
@@ -7,16 +8,20 @@ namespace QuickCart.Areas.Customer.Controllers;
 [Area("Customer")]
 public class HomeController : Controller
 {
+    // Injecting the logger service to log messages
     private readonly ILogger<HomeController> _logger;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
+        _unitOfWork = unitOfWork;
     }
 
     public IActionResult Index()
     {
-        return View();
+        IEnumerable<Product> prductList = _unitOfWork.Product.GetAll(includedProperties:"Category").ToList();
+        return View(prductList);
     }
 
     public IActionResult Privacy()

@@ -77,3 +77,10 @@ body.loaded #preloader {
     opacity: 0;
     visibility: hidden;
 }
+
+/* Card Styles */
+.card:hover {
+    transform: scale(1.02);
+    transition: 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
