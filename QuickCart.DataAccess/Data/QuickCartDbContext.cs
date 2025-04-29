@@ -1,13 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuickCart.Models;
 
 namespace QuickCart.Data
 {
-    public class QuickCartDbContext : DbContext
-    {
+    public class QuickCartDbContext : IdentityDbContext<IdentityUser>
+    {   
         public QuickCartDbContext(DbContextOptions<QuickCartDbContext> options) : base(options)
         {
-        }
+        }   
 
         // Add DbSet property for Category model
         public DbSet<Category> Categories { get; set; }
@@ -16,6 +18,8 @@ namespace QuickCart.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Action", DisplayOrder = 1 },
                 new Category { Id = 2, Name = "Horror", DisplayOrder = 2 },
