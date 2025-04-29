@@ -18,10 +18,24 @@ public class HomeController : Controller
         _unitOfWork = unitOfWork;
     }
 
+    // Fetching the list of products from the database
     public IActionResult Index()
     {
         IEnumerable<Product> prductList = _unitOfWork.Product.GetAll(includedProperties:"Category").ToList();
         return View(prductList);
+    }
+
+    // Fetching the details of a specific product
+    public IActionResult Details(int productId)
+    {
+        Product product = _unitOfWork.Product.Get(u => u.Id == productId , includedProperties: "Category");
+
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        return View(product);
     }
 
     public IActionResult Privacy()

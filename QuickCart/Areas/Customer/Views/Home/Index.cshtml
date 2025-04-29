@@ -33,7 +33,9 @@
                             </span>
                         </div>
 
-                        <a href="/admin/product/upsert?id=@product.Id" class="btn btn-dark w-100 mt-auto rounded-pill">
+                        <a asp-action="Details"
+                        asp-route-productId="@product.Id"
+                        class="btn btn-dark w-100 mt-auto rounded-pill">
                             <i class="bi bi-eye-fill me-1"></i> View Product
                         </a>
                     </div>
