@@ -9,6 +9,7 @@
 <ItemGroup>
 	<FrameworkReferance Include="Microsoft.AspNetCore.App" />
 	<PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.3.0" />
+	<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.11" />
 </ItemGroup>
 
 </Project>

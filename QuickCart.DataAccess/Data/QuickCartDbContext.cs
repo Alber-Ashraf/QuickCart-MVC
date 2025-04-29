@@ -15,6 +15,8 @@ namespace QuickCart.Data
         public DbSet<Category> Categories { get; set; }
         // Add DbSet property for Product model
         public DbSet<Product> Products { get; set; }
+        // Add DbSet property for ApplicationUser model
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
