@@ -3,6 +3,8 @@ using QuickCart.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using QuickCart.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using QuickCart.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +13,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<QuickCartDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<QuickCartDbContext>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<QuickCartDbContext>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 builder.Services.AddRazorPages();
 
