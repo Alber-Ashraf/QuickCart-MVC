@@ -92,12 +92,19 @@
                     </div>
 
                     <!-- Role -->
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-floating">
                             <select asp-for="Input.Role" asp-items="@Model.Input.Role_List" class="form-select">
                                 <option disabled selected>Select a role</option>
                             </select>
                             <label asp-for="Input.Role">Role</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select asp-for="Input.CompanyId" style="display:none" asp-items="@Model.Input.Company_List" class="form-select">
+                                <option disabled selected>Select Company</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -132,4 +139,18 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+		$(document).ready(function () {
+			// Show CompanyId select if Role is "Company"
+			$('#Input_Role').change(function () {
+				if ($(this).val() === 'Company') {
+					$('#Input_CompanyId').show();
+				} else {
+					$('#Input_CompanyId').hide();
+				}
+			});
+			// Trigger change on page load to set initial visibility
+			$('#Input_Role').trigger('change');
+		});
+    </script>
 }
