@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuickCart.Data;
 
@@ -11,9 +12,11 @@ using QuickCart.Data;
 namespace QuickCart.DataAccess.Migrations
 {
     [DbContext(typeof(QuickCartDbContext))]
-    partial class QuickCartDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250430143000_AddCompanyTableToDb")]
+    partial class AddCompanyTableToDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -305,38 +308,6 @@ namespace QuickCart.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "123 Main St",
-                            City = "New York",
-                            Name = "Tech group",
-                            Phone = "123-456-7890",
-                            PostalCode = "10001",
-                            State = "NY"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Address = "456 Elm St",
-                            City = "Los Angeles",
-                            Name = "Tech group 2",
-                            Phone = "987-654-3210",
-                            PostalCode = "90001",
-                            State = "CA"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Address = "789 Oak St",
-                            City = "Chicago",
-                            Name = "Tech group 3",
-                            Phone = "555-555-5555",
-                            PostalCode = "60601",
-                            State = "IL"
-                        });
                 });
 
             modelBuilder.Entity("QuickCart.Models.Product", b =>

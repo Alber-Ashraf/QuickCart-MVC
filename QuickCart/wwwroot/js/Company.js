@@ -6,33 +6,18 @@ $(document).ready(function () {
 function loadDataTable() {
     dataTable = $('#tblData').DataTable({
         "ajax": {
-            url: '/Admin/Product/GetAll',
+            url: '/Admin/Company/GetAll',
             dataSrc: 'data'
         },
         "columns": [
             {
-                data: 'title',
-                width: "20%",
+                data: 'name',
+                width: "40%",
                 className: "text-nowrap"
             },
             {
-                data: 'author',
-                width: "20%",
-                className: "text-nowrap"
-            },
-            {
-                data: 'isbn',
-                width: "10%",
-                className: "text-nowrap"
-            },
-            {
-                data: 'price',
-                width: "10%",
-                className: "text-nowrap"
-            },
-            {
-                data: 'category.name',
-                width: "15%",
+                data: 'phone',
+                width: "35%",
                 className: "text-nowrap"
             },
             {
@@ -40,10 +25,10 @@ function loadDataTable() {
                 "render": function (data) {
                     return `
                     <div class="btn-group w-100 justify-content-center" role="group">
-                        <a href="/Admin/Peoduct/Upsert?id=${data}"
+                        <a href="/Admin/Company/Upsert?id=${data}"
                            class="btn btn-dark mx-2"> <i class="bi bi-pencil-square"></i> Edit
                         </a>
-                        <a onClick="Delete('/Admin/Product/Delete/${data}')"
+                        <a onClick="Delete('/Admin/Company/Delete/${data}')"
                            class="btn btn-danger mx-2"> <i class="bi bi-trash-fill"></i> Delete
                         </a>
                     </div>`;
@@ -54,9 +39,9 @@ function loadDataTable() {
         ],
         responsive: true,
         language: {
-            emptyTable: "No products available",
+            emptyTable: "No companies available",
             search: "_INPUT_",
-            searchPlaceholder: "Search products..."
+            searchPlaceholder: "Search companies..."
         }
     });
 }

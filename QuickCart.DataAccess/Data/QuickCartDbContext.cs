@@ -15,6 +15,10 @@ namespace QuickCart.Data
         public DbSet<Category> Categories { get; set; }
         // Add DbSet property for Product model
         public DbSet<Product> Products { get; set; }
+
+        // Add DbSet property for Company model
+        public DbSet<Company> Companies { get; set; }
+
         // Add DbSet property for ApplicationUser model
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
@@ -27,6 +31,39 @@ namespace QuickCart.Data
                 new Category { Id = 2, Name = "Horror", DisplayOrder = 2 },
                 new Category { Id = 3, Name = "History", DisplayOrder = 3 }
             );
+
+            modelBuilder.Entity<Company>().HasData(
+                new Company
+                {
+                    Id = 1,
+                    Name = "Tech group",
+                    Address = "123 Main St",
+                    City = "New York",
+                    State = "NY",
+                    PostalCode = "10001",
+                    Phone = "123-456-7890"
+                },
+                new Company
+                {
+                    Id = 2,
+                    Name = "Tech group 2",
+                    Address = "456 Elm St",
+                    City = "Los Angeles",
+                    State = "CA",
+                    PostalCode = "90001",
+                    Phone = "987-654-3210"
+                },
+                new Company
+                {
+                    Id = 3,
+                    Name = "Tech group 3",
+                    Address = "789 Oak St",
+                    City = "Chicago",
+                    State = "IL",
+                    PostalCode = "60601",
+                    Phone = "555-555-5555"
+                }
+                );
 
             modelBuilder.Entity<Product>().HasData(
                 new Product

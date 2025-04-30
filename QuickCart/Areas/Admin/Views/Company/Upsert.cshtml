@@ -1,0 +1,97 @@
+﻿@model Company
+
+@{
+    ViewData["Title"] = Model.Id != 0 ? "Update Company" : "Create Company";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-dark text-white text-center rounded-top-4">
+                    <h4 class="mb-0">
+                        <i class="bi bi-building me-2"></i> @(Model.Id != 0 ? "Update" : "Create") Company
+                    </h4>
+                </div>
+                <div class="card-body bg-light rounded-bottom-4">
+                    <form asp-action="Upsert" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="row g-3">
+
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="Name" class="form-control" placeholder="Company Name" />
+                                    <label asp-for="Name"><i class="bi bi-type me-2"></i>Company Name</label>
+                                    <span asp-validation-for="Name" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="Address" class="form-control" placeholder="Street Address" />
+                                    <label asp-for="Address"><i class="bi bi-geo me-2"></i>Street Address</label>
+                                    <span asp-validation-for="Address" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="City" class="form-control" placeholder="City" />
+                                    <label asp-for="City"><i class="bi bi-buildings me-2"></i>City</label>
+                                    <span asp-validation-for="City" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input asp-for="State" class="form-control" placeholder="State" />
+                                    <label asp-for="State"><i class="bi bi-map me-2"></i>State</label>
+                                    <span asp-validation-for="State" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-floating">
+                                    <input asp-for="PostalCode" class="form-control" placeholder="Postal Code" />
+                                    <label asp-for="PostalCode"><i class="bi bi-envelope me-2"></i>Postal Code</label>
+                                    <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input asp-for="Phone" class="form-control" placeholder="Phone Number" />
+                                    <label asp-for="Phone"><i class="bi bi-telephone me-2"></i>Phone Number</label>
+                                    <span asp-validation-for="Phone" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
+                                    <i class="bi bi-arrow-left-circle me-1"></i> Back
+                                </a>
+                                @if (Model.Id != 0)
+                                {
+                                    <button type="submit" class="btn btn-success px-4 rounded-pill">
+                                        <i class="bi bi-check-circle me-1"></i> Update
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-success px-4 rounded-pill">
+                                        <i class="bi bi-check-circle me-1"></i> Create
+                                    </button>
+                                }
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
