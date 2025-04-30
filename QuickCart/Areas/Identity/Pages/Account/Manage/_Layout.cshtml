@@ -1,25 +1,28 @@
 ﻿@{
-    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
     {
         Layout = parentLayout.ToString();
     }
     else
     {
-        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+        Layout = "/Views/Shared/_Layout.cshtml";
     }
 }
 
-<h1>Manage your account</h1>
+<div class="container py-5 text-light bg-dark">
+    <h2 class="mb-4 fw-bold text-light">Manage Your Account</h2>
 
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
     <div class="row">
-        <div class="col-md-3">
+        <!-- Side Navigation -->
+        <div class="col-lg-3 mb-4">
             <partial name="_ManageNav" />
         </div>
-        <div class="col-md-9">
-            @RenderBody()
+
+        <!-- Main Content -->
+        <div class="col-lg-6">
+            <div class="p-4 rounded-4 shadow" style="background-color: #1e1e1e;">
+                @RenderBody()
+            </div>
         </div>
     </div>
 </div>

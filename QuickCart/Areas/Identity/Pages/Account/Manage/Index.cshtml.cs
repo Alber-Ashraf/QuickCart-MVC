@@ -58,6 +58,12 @@ namespace QuickCart.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            public string Name { get; set; }
+            public string Address { get; set; }
+            public string PostalCode { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
         }
 
         private async Task LoadAsync(IdentityUser user)
@@ -65,11 +71,13 @@ namespace QuickCart.Areas.Identity.Pages.Account.Manage
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
+
             Username = userName;
 
             Input = new InputModel
             {
                 PhoneNumber = phoneNumber
+
             };
         }
 

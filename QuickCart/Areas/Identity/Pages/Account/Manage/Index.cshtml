@@ -5,22 +5,66 @@
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h3 class="text-light">@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+<div class="row ">
+    <div class="col-md-12">
+        <form id="profile-form" method="post" class="text-light">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+            <!-- Username (disabled) -->
             <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
-                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control bg-light text-dark" placeholder="Username" disabled />
+                <label asp-for="Username" class="text-dark"></label>
             </div>
+
+            <!-- Full Name -->
             <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                <input asp-for="Input.Name" class="form-control bg-light text-dark" placeholder="Full Name" />
+                <label asp-for="Input.Name" class="text-dark"></label>
+                <span asp-validation-for="Input.Name" class="text-danger"></span>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.PhoneNumber" class="form-control bg-light text-dark" placeholder="Phone Number" />
+                <label asp-for="Input.PhoneNumber" class="text-dark"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+
+            <!-- Address -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Address" class="form-control bg-light text-dark" placeholder="Address" />
+                <label asp-for="Input.Address" class="text-dark"></label>
+                <span asp-validation-for="Input.Address" class="text-danger"></span>
+            </div>
+
+            <!-- Postal Code -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.PostalCode" class="form-control bg-light text-dark" placeholder="Postal Code" />
+                <label asp-for="Input.PostalCode" class="text-dark"></label>
+                <span asp-validation-for="Input.PostalCode" class="text-danger"></span>
+            </div>
+
+            <!-- City -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.City" class="form-control bg-light text-dark" placeholder="City" />
+                <label asp-for="Input.City" class="text-dark"></label>
+                <span asp-validation-for="Input.City" class="text-danger"></span>
+            </div>
+
+            <!-- State -->
+            <div class="form-floating mb-3">
+                <input asp-for="Input.State" class="form-control bg-light text-dark" placeholder="State" />
+                <label asp-for="Input.State" class="text-dark"></label>
+                <span asp-validation-for="Input.State" class="text-danger"></span>
+            </div>
+
+            <!-- Submit Button -->
+            <button id="update-profile-button" type="submit" class="w-100 btn btn-warning text-dark fw-bold">
+                <i class="bi bi-save2 me-1"></i> Save Changes
+            </button>
         </form>
     </div>
 </div>
