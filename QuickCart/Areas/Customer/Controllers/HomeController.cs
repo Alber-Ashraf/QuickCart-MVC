@@ -28,14 +28,14 @@ public class HomeController : Controller
     // Fetching the details of a specific product
     public IActionResult Details(int productId)
     {
-        Product product = _unitOfWork.Product.Get(u => u.Id == productId , includedProperties: "Category");
-
-        if (product == null)
+        ShoppingCart cartObj = new()
         {
-            return NotFound();
-        }
-
-        return View(product);
+            Product = _unitOfWork.Product.Get(u => u.Id == productId, includedProperties: "Category"),
+            Count = 1,
+            ProductId = productId
+        };
+        
+        return View(cartObj);
     }
 
     public IActionResult Privacy()
