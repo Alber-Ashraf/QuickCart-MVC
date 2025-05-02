@@ -39,6 +39,39 @@ namespace QuickCart.Areas.Customer.Controllers
 
             return View(ShoppingCartVM);
         }
+
+        public IActionResult Plus(int cartId)
+        {
+            var cart = _unitOfWork.ShoppingCart.Get(x => x.Id == cartId);
+            cart.Count += 1;
+            _unitOfWork.ShoppingCart.Update(cart);
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Minus(int cartId)
+        {
+            var cart = _unitOfWork.ShoppingCart.Get(x => x.Id == cartId);
+            if (cart.Count == 1)
+            {
+                _unitOfWork.ShoppingCart.Remove(cart);
+                _unitOfWork.Save();
+            }
+            else
+            {
+                cart.Count -= 1;
+                _unitOfWork.ShoppingCart.Update(cart);
+                _unitOfWork.Save();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        public IActionResult Remove(int cartId)
+        {
+            var cart = _unitOfWork.ShoppingCart.Get(x => x.Id == cartId);
+            _unitOfWork.ShoppingCart.Remove(cart);
+            _unitOfWork.Save();
+            return RedirectToAction(nameof(Index));
+        }
         private double GetPriceBasedOnQuantity(ShoppingCart shoppingCart)
         {
             if (shoppingCart.Count <= 50)
