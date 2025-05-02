@@ -54,9 +54,14 @@ namespace QuickCart.DataAccess.Repository
         }
 
         // This method is used to get all entities from the database
-        public IEnumerable<T> GetAll(string? includedProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includedProperties = null)
         {
             IQueryable<T> query = dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
             if (!string.IsNullOrEmpty(includedProperties))
             {
                 foreach (var includeProperty in includedProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
