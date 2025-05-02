@@ -102,3 +102,14 @@ body.loaded #preloader {
         color: #000 !important;
         font-weight: bold;
     }
+
+
+/* Button Styles */
+.hover-shadow:hover {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease-in-out;
+}
+
+.transition {
+    transition: all 0.3s ease-in-out;
+}
