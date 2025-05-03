@@ -37,7 +37,7 @@ namespace QuickCart.Models
         [Required]
         public string PhoneNumber { get; set; }
         [Required]
-        public string Adress { get; set; }
+        public string Address { get; set; }
         [Required]
         public string City { get; set; }
         [Required]
