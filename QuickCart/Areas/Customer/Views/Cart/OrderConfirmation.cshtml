@@ -1,0 +1,17 @@
+﻿@model int
+
+<div class="container py-5 text-center">
+    <h2 class="text-success mb-4">Thank you for your order!</h2>
+    <p class="lead">Your order has been successfully confirmed.</p>
+
+    @if (@Model != null)
+    {
+        <p>Your order ID is: <strong>@Model</strong></p>
+    }
+
+    <div class="mt-4">
+        <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary">
+            Back to Home
+        </a>
+    </div>
+</div>

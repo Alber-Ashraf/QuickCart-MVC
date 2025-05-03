@@ -109,13 +109,12 @@ namespace QuickCart.Areas.Customer.Controllers
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId,
-                includedProperties: "Product");
+            ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includedProperties: "Product");
 
             ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
             ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
 
-            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUsers.Get(x => x.Id == userId);
+            ApplicationUser applicationUser = _unitOfWork.ApplicationUsers.Get(x => x.Id == userId);
 
             foreach (var cart in ShoppingCartVM.ShoppingCartList)
             {
@@ -123,7 +122,7 @@ namespace QuickCart.Areas.Customer.Controllers
                 ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
             }
 
-            if (ShoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
                 // Company is not available
                 ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
@@ -151,7 +150,18 @@ namespace QuickCart.Areas.Customer.Controllers
                 _unitOfWork.Save();
             }
 
-            return View();
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+            {
+            }
+            else
+            {
+                return RedirectToAction(nameof(OrderConfirmation), new { id=ShoppingCartVM.OrderHeader.OrderHeaderId });
+            }
+        }
+
+        public IActionResult OrderConfirmation(int id)
+        {
+            return View(id);
         }
 
         private double GetPriceBasedOnQuantity(ShoppingCart shoppingCart)
