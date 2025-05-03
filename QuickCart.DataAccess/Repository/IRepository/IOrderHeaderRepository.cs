@@ -11,5 +11,7 @@ namespace QuickCart.DataAccess.Repository.IRepository
     {
         // Define methods specific to OrderHeader repository
         void Update(OrderHeader obj);
+        void UpdateStatus(int id, string orderStatus, string? paymentStatus = null);
+        void UpdateStripePaymentId(int id, string sessionId, string paymentIntentId);
     }
 }
