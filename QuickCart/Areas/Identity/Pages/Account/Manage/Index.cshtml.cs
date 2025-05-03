@@ -6,9 +6,13 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using QuickCart.DataAccess.Repository;
+using QuickCart.DataAccess.Repository.IRepository;
+using QuickCart.Models;
 
 namespace QuickCart.Areas.Identity.Pages.Account.Manage
 {
@@ -16,13 +20,16 @@ namespace QuickCart.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IUnitOfWork _unitOfWork;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+        UserManager<IdentityUser> userManager,
+        SignInManager<IdentityUser> signInManager,
+        IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -71,13 +78,18 @@ namespace QuickCart.Areas.Identity.Pages.Account.Manage
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
-
             Username = userName;
+
+            var applicationUser = (ApplicationUser)user;
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
-
+                PhoneNumber = phoneNumber,
+                Name = applicationUser.Name,
+                Address = applicationUser.Address,
+                PostalCode = applicationUser.PostalCode,
+                City = applicationUser.City,
+                State = applicationUser.State
             };
         }
 
@@ -117,6 +129,17 @@ namespace QuickCart.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
+
+            var applicationUser = (ApplicationUser)user;
+
+            applicationUser.Name = Input.Name;
+            applicationUser.Address = Input.Address;
+            applicationUser.PostalCode = Input.PostalCode;
+            applicationUser.City = Input.City;
+            applicationUser.State = Input.State;
+
+            _unitOfWork.ApplicationUsers.Update(applicationUser);
+            _unitOfWork.Save();
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
