@@ -10,7 +10,6 @@ namespace QuickCart.Data
         public QuickCartDbContext(DbContextOptions<QuickCartDbContext> options) : base(options)
         {
         }   
-
         // Add DbSet property for Category model
         public DbSet<Category> Categories { get; set; }
         // Add DbSet property for Product model
@@ -23,6 +22,10 @@ namespace QuickCart.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         // Add DbSet property for ShoppingCart model
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
+        // Add DbSet property for OrderHeader model
+        public DbSet<OrderHeader> OrderHeaders { get; set; }
+        // Add DbSet property for OrderDetails model
+        public DbSet<OrderDetail> OrderDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
