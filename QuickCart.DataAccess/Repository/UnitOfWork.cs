@@ -18,6 +18,8 @@ namespace QuickCart.DataAccess.Repository
         public IProductRepository Products { get; private set; }
         public IShoppingCartRepository ShoppingCart { get; private set; }
         public IApplicationUserRepository ApplicationUsers { get; private set; }
+        public IOrderHeaderRepository OrderHeader { get; private set; }
+        public IOrderDetailRepository OrderDetails { get; private set; }
         public UnitOfWork(QuickCartDbContext db)
         {
             _db = db;
@@ -27,6 +29,8 @@ namespace QuickCart.DataAccess.Repository
             Products = new ProductRepository(_db);
             ShoppingCart = new ShoppingCartRepository(_db);
             ApplicationUsers = new ApplicationUserRepository(_db);
+            OrderHeader = new OrderHeaderRepository(_db);
+            OrderDetails = new OrderDetailRepository(_db);
         }
         public void Save()
         {
