@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
+using QuickCart.Utility;
 
 namespace QuickCart.Areas.Admin.Controllers
 {
@@ -22,10 +23,29 @@ namespace QuickCart.Areas.Admin.Controllers
         // This method is used to get the list of Products in JSON format for DataTables
         #region ApI Calls
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string status)
         {
             // Fetch the list of Products from the database
-            List<OrderHeader> objOrderHeaders = _unitOfWork.OrderHeader.GetAll(includedProperties: "ApplicationUser").ToList();
+            IEnumerable<OrderHeader> objOrderHeaders = _unitOfWork.OrderHeader.GetAll(includedProperties: "ApplicationUser").ToList();
+
+            switch (status)
+            {
+                case "pending":
+                    objOrderHeaders = objOrderHeaders.Where(u => u.PaymentStatus == SD.PaymentStatusDelayedPayment).ToList();
+                    break;
+                case "inprocess":
+                    objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusInProcess).ToList();
+                    break;
+                case "completed":
+                    objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusShipped).ToList();
+                    break;
+                case "approved":
+                    objOrderHeaders = objOrderHeaders.Where(u => u.OrderStatus == SD.StatusApproved).ToList();
+                    break;
+                default:
+                    break;
+            }
+
             // Return the list as JSON
             return Json(new { data = objOrderHeaders });
         }
