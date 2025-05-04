@@ -8,7 +8,7 @@ namespace QuickCart.Models.ViewModels
 {
     public class OrderVM
     {
-        OrderHeader OrderHeader { get; set; }
+        public OrderHeader OrderHeader { get; set; }
         public IEnumerable<OrderDetail> OrderDetail { get; set; }
     }
 }

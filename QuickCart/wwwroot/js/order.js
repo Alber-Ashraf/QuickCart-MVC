@@ -58,26 +58,26 @@ function loadDataTable(status) {
             },
             {
                 data: 'orderTotal',
-                width: "10%",
+                width: "30%",
                 className: "text-nowrap"
             },
             {
-                data: 'id',
+                data: 'orderHeaderId',
                 "render": function (data) {
                     return `
                     <div class="btn-group w-100 justify-content-center" role="group">
-                        <a href="/Admin/Peoduct/Upsert?id=${data}"
+                        <a href="/Admin/Order/Details?orderId=${data}"
                            class="btn btn-dark mx-2"> <i class="bi bi-pencil-square"></i> Edit
                         </a>
                     </div>`;
                 },
-                "width": "25%",
+                "width": "5%",
                 className: "text-nowrap"
             }
         ],
         responsive: true,
         language: {
-            emptyTable: "No products available",
+            emptyTable: "No Orders available",
             search: "_INPUT_",
             searchPlaceholder: "Search products..."
         }
