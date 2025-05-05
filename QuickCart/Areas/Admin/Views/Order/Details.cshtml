@@ -223,7 +223,7 @@
                         </h5>
 
                         <span class="badge bg-secondary text-light col-lg-12 mb-3 fs-4">Order Status - @Model.OrderHeader.OrderStatus</span>
-                            <ul class="list-group shadow-sm">
+                        <ul class="list-group shadow-sm">
                             @foreach (var detail in Model.OrderDetail)
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -235,17 +235,35 @@
                                     <span class="text-success fw-semibold">@((detail.Count * @detail.Price).ToString("c"))</span>
                                 </li>
                             }
-                                <li class="list-group-item bg-primary text-white d-flex justify-content-between">
-                                    <span class="fw-bold">TOTAL</span>
+                            <li class="list-group-item bg-primary text-white d-flex justify-content-between">
+                                <span class="fw-bold">TOTAL</span>
                                 <span class="fw-bold">@Model.OrderHeader.OrderTotal.ToString("c")</span>
-                                </li>
-                            </ul>
+                            </li>
+                        </ul>
 
                         <div class="d-grid gap-2 mt-4">
-                            <input type="submit" value="Pay Now" class="btn btn-success btn-lg" />
-                            <input type="submit" value="Start Processing" class="nav-link text-light btn btn-dark btn-lg" />
-                            <input type="submit" value="Ship Order" class="nav-link text-light btn btn-dark btn-lg" />
-                            <input type="submit" value="Cancel Order" class="btn btn-danger btn-lg" />
+                            @if(Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment &&
+                            Model.OrderHeader.OrderStatus == SD.StatusShipped)
+                            {
+                                <button type="submit" value="Pay Now" class="btn btn-success btn-lg"></button>
+                            }
+                            @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                            {
+                                @if (Model.OrderHeader.OrderStatus == SD.StatusApproved)
+                                {
+                                    <button type="submit" value="Start Processing" class="nav-link text-light btn btn-dark btn-lg"></button>
+                                }
+                                @if (Model.OrderHeader.OrderStatus == SD.StatusInProcess)
+                                {
+                                    <button type="submit" value="Ship Order" class="nav-link text-light btn btn-dark btn-lg"></button>
+                                }
+                                @if (Model.OrderHeader.OrderStatus != SD.StatusRefunded &&
+                                    Model.OrderHeader.OrderStatus != SD.StatusShipped &&
+                                    Model.OrderHeader.OrderStatus != SD.StatusCancelled)
+                                {
+                                    <button type="submit" value="Cancel Order" class="btn btn-danger btn-lg"></button>
+                                }
+                            }
                         </div>
                     </div>
                 </div>
