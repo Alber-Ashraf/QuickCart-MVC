@@ -135,7 +135,7 @@
                             <div class="col-9">
                                 @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                                 {
-                                    <input asp-for="@Model.OrderHeader.Carrier" type="text" class="form-control" />
+                                    <input asp-for="@Model.OrderHeader.Carrier" id="carrier" type="text" class="form-control" />
                                 }
                                 else
                                 {
@@ -149,7 +149,7 @@
                             <div class="col-9">
                                 @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                                 {
-                                    <input asp-for="@Model.OrderHeader.TrackingNumber" type="text" class="form-control" />
+                                    <input asp-for="@Model.OrderHeader.TrackingNumber" id="trackingNumber" type="text" class="form-control" />
                                 }
                                 else
                                 {
@@ -260,14 +260,14 @@
                             {
                                 @if (Model.OrderHeader.OrderStatus == SD.StatusApproved)
                                 {
-                                    <button type="submit" name="action" value="StartProcessing" class="btn btn-primary btn-lg shadow-sm">
+                                    <button type="submit" asp-action="StartProcessing" class="btn btn-primary btn-lg shadow-sm">
                                         <i class="fas fa-play me-2"></i> Start Processing
                                     </button>
                                 }
 
                                 @if (Model.OrderHeader.OrderStatus == SD.StatusInProcess)
                                 {
-                                    <button type="submit" name="action" value="ShipOrder" class="btn btn-info btn-lg text-white shadow-sm">
+                                    <button type="submit" onclick="return validateInput()" asp-action="StartShipping" class="btn btn-info btn-lg text-white shadow-sm">
                                         <i class="fas fa-shipping-fast me-2"></i> Ship Order
                                     </button>
                                 }
@@ -290,3 +290,30 @@
         </div>
     </div>
 </form>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function validateInput(){
+            if(document.getElementById("trackingNumber").value==""){
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter tracking number!',
+                });
+                return false;
+            }
+            if (document.getElementById("carrier").value =="") {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please enter carrier!',
+                });
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+}
