@@ -25,11 +25,11 @@
 
                         <div class="d-flex align-items-center gap-2 mb-3">
                             <span class="fw-bold text-decoration-line-through text-muted">
-                                EGP @product.ListPrice.ToString("0.00")
+                                @product.ListPrice.ToString("c")
                             </span>
                             >>
                             <span class="fw-bold text-success fs-5">
-                                EGP @product.Price.ToString("0.00")
+                                @product.Price.ToString("c")
                             </span>
                         </div>
 

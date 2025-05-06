@@ -32,9 +32,9 @@
                                     <div class="mb-3">
                                         <h6 class="fw-bold">Pricing Based on Quantity:</h6>
                                         <ul class="list-unstyled small mb-3">
-                                            <li><i class="bi bi-check-circle-fill text-success me-1"></i> 1-50: <strong>EGP @Model.Product.Price.ToString("0.00")</strong></li>
-                                            <li><i class="bi bi-check-circle-fill text-success me-1"></i> 51-100: <strong>EGP @Model.Product.Price50.ToString("0.00")</strong></li>
-                                            <li><i class="bi bi-check-circle-fill text-success me-1"></i> 100+: <strong>EGP @Model.Product.Price100.ToString("0.00")</strong></li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-1"></i> 1-50: <strong>@Model.Product.Price.ToString("c")</strong></li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-1"></i> 51-100: <strong>@Model.Product.Price50.ToString("c")</strong></li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-1"></i> 100+: <strong>@Model.Product.Price100.ToString("c")</strong></li>
                                         </ul>
                                     </div>
 
