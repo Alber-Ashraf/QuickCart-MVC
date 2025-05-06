@@ -1,0 +1,16 @@
+﻿@model int
+
+<div class="container py-5 text-center">
+    <p class="lead">Payment has been applied successfully!</p>
+
+    @if (@Model != null)
+    {
+        <p>Your order ID is: <strong>@Model</strong></p>
+    }
+
+    <div class="mt-4">
+        <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-orderId="@Model" class="btn btn-primary">
+            Back to Order Details
+        </a>
+    </div>
+</div>
