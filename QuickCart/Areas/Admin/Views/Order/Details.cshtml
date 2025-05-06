@@ -276,7 +276,7 @@
                                Model.OrderHeader.OrderStatus != SD.StatusShipped &&
                                Model.OrderHeader.OrderStatus != SD.StatusCancelled)
                                 {
-                                    <button type="submit" name="action" value="CancelOrder" class="btn btn-danger btn-lg shadow-sm">
+                                    <button type="submit" asp-action="CancelOrder" name="action" value="CancelOrder" class="btn btn-danger btn-lg shadow-sm">
                                         <i class="fas fa-times-circle me-2"></i> Cancel Order
                                     </button>
                                 }

@@ -7,6 +7,7 @@ using QuickCart.Utility;
 using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Stripe;
 
 namespace BulkyBookWeb.Areas.Admin.Controllers
 {
@@ -94,6 +95,36 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
                 _unitOfWork.Save(); 
             }
             TempData["success"] = "Order Shipped Successfully";
+            return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.OrderHeaderId });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult CancelOrder()
+        {
+            var orderHeaderFromDb = _unitOfWork.OrderHeader.Get(u => u.OrderHeaderId == OrderVM.OrderHeader.OrderHeaderId);
+            if (orderHeaderFromDb != null)
+            {
+                if(orderHeaderFromDb.PaymentStatus == SD.PaymentStatusApproved)
+                {
+                    var options = new RefundCreateOptions
+                    {
+                        Reason = RefundReasons.RequestedByCustomer,
+                        PaymentIntent = orderHeaderFromDb.PaymentIntentId
+                    };
+
+                    var service = new RefundService();
+                    Refund refund = service.Create(options);
+
+                    _unitOfWork.OrderHeader.UpdateStatus(orderHeaderFromDb.OrderHeaderId, SD.StatusCancelled, SD.StatusRefunded);
+                }
+                else
+                {
+                    _unitOfWork.OrderHeader.UpdateStatus(orderHeaderFromDb.OrderHeaderId, SD.StatusCancelled, SD.StatusCancelled);
+                }
+            }
+            _unitOfWork.Save();
+            TempData["success"] = "Order Cancelled Successfully";
             return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.OrderHeaderId });
         }
 
