@@ -54,7 +54,7 @@ namespace QuickCart.DataAccess.Repository
         }
 
         // This method is used to get all entities from the database
-        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includedProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includedProperties = null, bool tracking = true)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)
@@ -68,6 +68,10 @@ namespace QuickCart.DataAccess.Repository
                 {
                     query = query.Include(includeProperty);
                 }
+            }
+            if (!tracking)
+            {
+                query = query.AsNoTracking();
             }
             return query.ToList();
         }

@@ -10,7 +10,7 @@ namespace QuickCart.DataAccess.Repository.IRepository
     public interface IRepository<T> where T : class
     {
         //T - Category
-        IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includedProperties = null);
+        IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includedProperties = null, bool tracking = true);
         T Get(Expression<Func<T, bool>> filter, string? includedProperties = null, bool tracked = false);
         void Add(T entity);
         void Remove(T entity);

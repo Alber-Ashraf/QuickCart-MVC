@@ -59,6 +59,11 @@ namespace QuickCart.Areas.Customer.Controllers
             var cart = _unitOfWork.ShoppingCart.Get(x => x.Id == cartId);
             if (cart.Count == 1)
             {
+                var cartCount = _unitOfWork.ShoppingCart
+                            .GetAll(u => u.ApplicationUserId == cart.ApplicationUserId, tracking: false)
+                            .Count();
+
+                HttpContext.Session.SetInt32(SD.SessionCart, cartCount - 1);
                 _unitOfWork.ShoppingCart.Remove(cart);
                 _unitOfWork.Save();
             }
@@ -73,7 +78,11 @@ namespace QuickCart.Areas.Customer.Controllers
         public IActionResult Remove(int cartId)
         {
             var cart = _unitOfWork.ShoppingCart.Get(x => x.Id == cartId);
-            _unitOfWork.ShoppingCart.Remove(cart);
+            var cartCount = _unitOfWork.ShoppingCart
+                    .GetAll(u => u.ApplicationUserId == cart.ApplicationUserId, tracking: false)
+                    .Count();
+
+            HttpContext.Session.SetInt32(SD.SessionCart, cartCount - 1); _unitOfWork.ShoppingCart.Remove(cart);
             _unitOfWork.Save();
             return RedirectToAction(nameof(Index));
         }
