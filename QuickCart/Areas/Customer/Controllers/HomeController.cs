@@ -24,14 +24,6 @@ public class HomeController : Controller
     // Fetching the list of products from the database
     public IActionResult Index()
     {
-        var claimsIdentity = (ClaimsIdentity)User.Identity;
-        var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
-
-        if (claim != null)
-        {
-            HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value).Count());
-        }
-
         IEnumerable<Product> prductList = _unitOfWork.Product.GetAll(includedProperties:"Category").ToList();
         return View(prductList);
     }
