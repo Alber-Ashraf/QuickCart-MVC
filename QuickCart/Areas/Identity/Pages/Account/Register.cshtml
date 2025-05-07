@@ -7,9 +7,14 @@
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="card shadow-lg border-0 rounded-4 p-4" style="width: 100%; max-width: 700px;">
         <div class="card-body">
+            @if(User.IsInRole(SD.Role_Admin))
+            {
+                <h2 class="text-center mb-3 fw-bold text-dark">Register - Admin Portal</h2>
+            }
+            else{
             <h2 class="text-center mb-3 fw-bold text-dark">Create Your Account</h2>
             <p class="text-center text-muted mb-4">Join our community and start your journey today!</p>
-
+            }
             <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
 
@@ -92,21 +97,25 @@
                     </div>
 
                     <!-- Role -->
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <select asp-for="Input.Role" asp-items="@Model.Input.Role_List" class="form-select">
-                                <option disabled selected>Select a role</option>
-                            </select>
-                            <label asp-for="Input.Role">Role</label>
+                    @if (User.IsInRole(SD.Role_Admin))
+                    {
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select asp-for="Input.Role" asp-items="@Model.Input.Role_List" class="form-select">
+                                    <option disabled selected>Select a role</option>
+                                </select>
+                                <label asp-for="Input.Role">Role</label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <select asp-for="Input.CompanyId" style="display:none" asp-items="@Model.Input.Company_List" class="form-select">
-                                <option disabled selected>Select Company</option>
-                            </select>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select asp-for="Input.CompanyId" style="display:none" asp-items="@Model.Input.Company_List" class="form-select">
+                                    <option disabled selected>Select Company</option>
+                                </select>
+                            </div>
                         </div>
-                    </div>
+                    }
+
                 </div>
 
                 <!-- Submit -->
@@ -118,21 +127,25 @@
             </form>
 
             <!-- External Login -->
-            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            @if (!User.IsInRole(SD.Role_Admin))
             {
-                <hr class="my-4" />
-                <div class="text-center">
-                    <p class="text-muted mb-2">Or sign up using</p>
-                    <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                        @foreach (var provider in Model.ExternalLogins!)
-                        {
-                            <button type="submit" class="btn btn-outline-secondary w-100 mb-2" name="provider" value="@provider.Name">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>@provider.DisplayName
-                            </button>
-                        }
-                    </form>
-                </div>
+                @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                {
+                    <hr class="my-4" />
+                    <div class="text-center">
+                        <p class="text-muted mb-2">Or sign up using</p>
+                        <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="btn btn-outline-secondary w-100 mb-2" name="provider" value="@provider.Name">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>@provider.DisplayName
+                                </button>
+                            }
+                        </form>
+                    </div>
+                }
             }
+            
         </div>
     </div>
 </div>
