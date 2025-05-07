@@ -2,6 +2,14 @@
 @model ExternalLoginModel
 @{
     ViewData["Title"] = "Register";
+    var externalLoginError = HttpContext.Request.Query["ExternalLoginError"];
+}
+@if (!string.IsNullOrEmpty(externalLoginError))
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @externalLoginError
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">

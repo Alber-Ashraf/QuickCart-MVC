@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using QuickCart.Utility;
 using Stripe;
+using Microsoft.AspNetCore.Authentication.OAuth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,16 @@ builder.Services.AddAuthentication().AddFacebook(options =>
 {
     options.AppId = "728695596395553";
     options.AppSecret = "273963a1abea30090f12b6ea637b00bc";
+
+    options.Events = new OAuthEvents
+    {
+        OnRemoteFailure = context =>
+        {
+            context.Response.Redirect("/Identity/Account/Login?ExternalLoginError=External login was canceled or failed. Please try again.");
+            context.HandleResponse();
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddDistributedMemoryCache();
