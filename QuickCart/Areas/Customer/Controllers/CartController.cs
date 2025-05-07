@@ -12,6 +12,7 @@ using Stripe.Checkout;
 namespace QuickCart.Areas.Customer.Controllers
 {
     [Area("Customer")]
+    [Authorize]
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

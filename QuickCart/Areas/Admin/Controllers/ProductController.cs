@@ -5,11 +5,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
 using QuickCart.Models.ViewModels;
+using QuickCart.Utility;
 
 namespace QuickCart.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
