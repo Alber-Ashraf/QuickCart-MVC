@@ -165,7 +165,8 @@ namespace QuickCart.Areas.Customer.Controllers
             {
                 //it is a regular customer account and we need to capture payment
                 //stripe logic
-                var domain = "https://localhost:7037/";
+                var domain = $"{Request.Scheme}://{Request.Host}/";
+
                 var options = new SessionCreateOptions
                 {
                     SuccessUrl = domain + $"Customer/Cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.OrderHeaderId}",
