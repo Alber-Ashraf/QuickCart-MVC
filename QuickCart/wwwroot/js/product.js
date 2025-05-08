@@ -40,7 +40,7 @@ function loadDataTable() {
                 "render": function (data) {
                     return `
                     <div class="btn-group w-100 justify-content-center" role="group">
-                        <a href="/Admin/Peoduct/Upsert?id=${data}"
+                        <a href="/Admin/Product/Upsert?id=${data}"
                            class="btn btn-dark mx-2"> <i class="bi bi-pencil-square"></i> Edit
                         </a>
                         <a onClick="Delete('/Admin/Product/Delete/${data}')"
