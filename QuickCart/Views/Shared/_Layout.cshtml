@@ -48,7 +48,7 @@
                                 <a class="nav-link text-light" asp-area="Admin" asp-controller="Order" asp-action="Index">Order Management</a>
                             </li>
                         }
-                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Admin))
+                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-light fw-semibold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
