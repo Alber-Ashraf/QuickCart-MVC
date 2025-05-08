@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuickCart.Models\QuickCart.Models.csproj" />
+    <ProjectReference Include="..\QuickCart.Utility\QuickCart.Utility.csproj" />
   </ItemGroup>
 
 </Project>
