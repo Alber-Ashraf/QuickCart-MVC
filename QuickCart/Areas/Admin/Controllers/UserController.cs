@@ -36,8 +36,15 @@ namespace QuickCart.Areas.Admin.Controllers
             // Fetch the list of Companys from the database
             List<ApplicationUser> objUserList = _db.ApplicationUsers.Include(c=>c.Company).ToList();
 
+            var userRole = _db.UserRoles.ToList();
+            var role = _db.Roles.ToList();
+
             foreach (var user in objUserList)
             {
+                // Get the role of the user
+                var roleId = userRole.FirstOrDefault(x => x.UserId == user.Id).RoleId;
+                user.Role = role.FirstOrDefault(x => x.Id == roleId).Name;
+
                 if (user.Company == null)
                 {
                     // If the Company is not null, set the Company name

@@ -31,7 +31,7 @@ function loadDataTable() {
                 className: "text-nowrap"
             },
             {
-                data: '',
+                data: 'role',
                 width: "15%",
                 className: "text-nowrap"
             },
