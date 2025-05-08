@@ -61,10 +61,26 @@ namespace QuickCart.Areas.Admin.Controllers
         }
 
         // This method is used to get the details of a specific Company for editing
-        [HttpDelete]
-        public IActionResult Delete(int? id)
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody] string id)
         {
-            return Json(new { sucess = true, massege = "Delete Sucsess" });
+            var userFromDb = _db.ApplicationUsers.FirstOrDefault(u => u.Id == id);
+            if (userFromDb == null)
+            {
+                return Json(new { success = false, message = "Error while locking/unlocking the user." });
+            }
+
+            if (userFromDb.LockoutEnd != null && userFromDb.LockoutEnd > DateTime.Now)
+            {
+                userFromDb.LockoutEnd = DateTime.Now;
+            }
+            else
+            {
+                userFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
+            }
+
+            _db.SaveChanges();
+            return Json(new { success = true, message = "Operation successful." });
         }
         #endregion
 
