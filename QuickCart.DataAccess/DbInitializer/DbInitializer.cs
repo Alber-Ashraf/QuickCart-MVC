@@ -13,14 +13,18 @@ namespace QuickCart.DataAccess.DbInitializer
 {
     public class DbInitializer : IDbInitializer
     {
-        private readonly QuickCartDbContext _db;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public DbInitializer(QuickCartDbContext db , UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly QuickCartDbContext _db;
+
+        public DbInitializer(
+            UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            QuickCartDbContext db)
         {
-            _db = db;
-            _userManager = userManager;
             _roleManager = roleManager;
+            _userManager = userManager;
+            _db = db;
         }
         public void Initialize()
         {
