@@ -82,20 +82,13 @@
                                 </div>
                             </div>
 
-                            @* <div class="mb-4">
-                                <label asp-for="Product.ImageURL" class="form-label fw-semibold">
+                            <div class="mb-4">
+                                <label asp-for="Product.ProductImages" class="form-label fw-semibold">
                                     <i class="bi bi-image me-2"></i> Upload Image
                                 </label>
-                                <input type="file" name="file" class="form-control bg-white" />
-                                <span asp-validation-for="Product.ImageURL" class="text-danger small"></span>
-
-                                @if (!string.IsNullOrEmpty(Model.Product.ImageURL))
-                                {
-                                    <div class="mt-3 text-center">
-                                        <img src="@Url.Content(Model.Product.ImageURL)" alt="Product Image" class="img-thumbnail" style="max-height: 250px;" />
-                                    </div>
-                                }
-                            </div> *@
+                                <input type="file" name="files" class="form-control bg-white" multiple />
+                                <span asp-validation-for="Product.ProductImages" class="text-danger small"></span>
+                            </div>
 
 
                             <div class="container mt-3 d-flex justify-content-center">

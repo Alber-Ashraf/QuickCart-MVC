@@ -53,52 +53,50 @@ namespace QuickCart.Areas.Admin.Controllers
             }
         }
         [HttpPost]
-        public IActionResult Upsert(ProductVM productVM, IFormFile? file, int? id)
+        public IActionResult Upsert(ProductVM productVM, List<IFormFile>? files, int? id)
         {
             // Check if the file is not null and has a valid size
             if (ModelState.IsValid)
             {
-                //string wwwRootPath = _webHostEnvironment.WebRootPath;
-                //if (file != null)
-                //{
-                //    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                //    string productPath = Path.Combine(wwwRootPath, @"images\products");
-
-                //    if (!string.IsNullOrEmpty(productVM.Product.ImageURL))
-                //    {
-                //        // If the product already has an image, delete the old image
-                //        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageURL.TrimStart('\\'));
-                //        if (System.IO.File.Exists(oldImagePath))
-                //        {
-                //            System.IO.File.Delete(oldImagePath);
-                //        }
-                //    }
-
-                //    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-                //    {
-                //        file.CopyTo(fileStream);
-                //    }
-
-                //    productVM.Product.ImageURL = @"\images\products\" + fileName;
-                //}
-
-                if (productVM.Product.Id == 0) 
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if (files != null)
                 {
-                    _unitOfWork.Product.Add(productVM.Product);
-                }
-                else
-                {
-                    var productFromDb = _unitOfWork.Product.Get(u => u.Id == productVM.Product.Id);
-                    if (productFromDb != null)
+                    // Loop through each file in the list
+                    foreach (IFormFile file in files) 
                     {
-                        // Update the existing Product in the database
-                        _unitOfWork.Product.Update(productVM.Product);
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        string productPath = @"images\products\product-" + productVM.Product.Id;
+                        string finalPath = Path.Combine(wwwRootPath, productPath);
 
+                        // Check if the directory exists, if not create it
+                        if (!Directory.Exists(finalPath))
+                            Directory.CreateDirectory(finalPath);
+
+                        using (var fileStream = new FileStream(Path.Combine(finalPath, fileName), FileMode.Create))
+                        {
+                            file.CopyTo(fileStream);
+                        }
+
+                        // Create a new ProductImage object
+                        ProductImage productImage = new()
+                        {
+                            ImageUrl = @"\" + productPath + @"\" + fileName,
+                            ProductId = productVM.Product.Id,
+                        };
+
+                        // Check if the Product already has images
+                        if (productVM.Product.ProductImages == null)
+                            productVM.Product.ProductImages = new List<ProductImage>();
+
+                        productVM.Product.ProductImages.Add(productImage);
                     }
+
+                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Save();
                 }
 
-                _unitOfWork.Save();
-                TempData["success"] = "Product saved successfully!";
+                TempData["success"] = "Product created/updated successfully";
+
                 return RedirectToAction("Index");
             }
             // If model state is not valid, return the view with the current model
