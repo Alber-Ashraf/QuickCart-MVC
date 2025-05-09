@@ -17,11 +17,11 @@ namespace QuickCart.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class UserController : Controller
     {
-        private readonly QuickCartDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UserController(QuickCartDbContext db)
+        public UserController(IUnitOfWork unitOfWork)
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
         }
 
         public IActionResult Index()
@@ -37,8 +37,8 @@ namespace QuickCart.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var userFromDb = _db.ApplicationUsers
-                .Include(u => u.Company)
+            var userFromDb = _unitOfWork.ApplicationUsers
+                .GetAll(includedProperties: "Company")
                 .FirstOrDefault(u => u.Id == id);
 
             if (userFromDb == null)
@@ -46,25 +46,30 @@ namespace QuickCart.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            // Get role name directly from joins
-            var userRole = (from userRoles in _db.UserRoles
-                            join roles in _db.Roles on userRoles.RoleId equals roles.Id
-                            where userRoles.UserId == id
-                            select roles.Name).FirstOrDefault();
+            // Get the list of all user roles and roles
+            var userRoles = _unitOfWork.UserRoles.GetAll();
+            var roles = _unitOfWork.Roles.GetAll();
+
+            // Get the role name for the user
+            var userRole = (from ur in userRoles
+                            join r in roles on ur.RoleId equals r.Id
+                            where ur.UserId == id
+                            select r.Name).FirstOrDefault();
 
             userFromDb.Role = userRole;
 
+            // Create a new UserVM object and populate it with the user data
             UserVM userVM = new()
             {
                 ApplicationUser = userFromDb,
 
-                Role_List = _db.Roles.Select(role => new SelectListItem
+                Role_List = _unitOfWork.Roles.GetAll().Select(role => new SelectListItem
                 {
                     Text = role.Name,
                     Value = role.Name
                 }),
 
-                Company_List = _db.Companies.Select(company => new SelectListItem
+                Company_List = _unitOfWork.Company.GetAll().Select(company => new SelectListItem
                 {
                     Text = company.Name,
                     Value = company.Id.ToString()
@@ -77,7 +82,7 @@ namespace QuickCart.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult ManagePermission(UserVM userVM)
         {
-            var userFromDb = _db.ApplicationUsers.FirstOrDefault(u => u.Id == userVM.ApplicationUser.Id);
+            var userFromDb = _unitOfWork.ApplicationUsers.Get(u => u.Id == userVM.ApplicationUser.Id);
             if (userFromDb == null)
             {
                 return NotFound();
@@ -87,29 +92,30 @@ namespace QuickCart.Areas.Admin.Controllers
             userFromDb.CompanyId = userVM.ApplicationUser.CompanyId;
 
             // 2. Remove existing role
-            var userRole = _db.UserRoles.FirstOrDefault(x => x.UserId == userVM.ApplicationUser.Id);
+            var userRole = _unitOfWork.UserRoles.Get(x => x.UserId == userVM.ApplicationUser.Id);
             if (userRole != null)
             {
-                _db.UserRoles.Remove(userRole);
+                _unitOfWork.UserRoles.Remove(userRole);
             }
 
             // 3. Assign new role
-            var newRole = _db.Roles.FirstOrDefault(x => x.Name == userVM.ApplicationUser.Role);
+            var newRole = _unitOfWork.Roles.Get(x => x.Name == userVM.ApplicationUser.Role);
             if (newRole != null)
             {
-                _db.UserRoles.Add(new IdentityUserRole<string>
+                _unitOfWork.UserRoles.Add(new IdentityUserRole<string>
                 {
                     UserId = userFromDb.Id,
                     RoleId = newRole.Id
                 });
             }
 
-            _db.SaveChanges();
             // 4. Update the user in the database
-            _db.ApplicationUsers.Update(userFromDb);
+            userFromDb.CompanyId = userVM.ApplicationUser.CompanyId;
+
+            _unitOfWork.ApplicationUsers.Update(userFromDb);
+            _unitOfWork.Save();
 
             // 4. Show success message
-
             TempData["success"] = "User permissions updated successfully.";
             return RedirectToAction("Index");
         }
@@ -122,10 +128,10 @@ namespace QuickCart.Areas.Admin.Controllers
         public IActionResult GetAll()
         {
             // Fetch the list of Companys from the database
-            List<ApplicationUser> objUserList = _db.ApplicationUsers.Include(c=>c.Company).ToList();
+            List<ApplicationUser> objUserList = _unitOfWork.ApplicationUsers.GetAll(includedProperties: "Company").ToList();
 
-            var userRole = _db.UserRoles.ToList();
-            var role = _db.Roles.ToList();
+            var userRole = _unitOfWork.UserRoles.GetAll().ToList();
+            var role = _unitOfWork.Roles.GetAll().ToList();
 
             foreach (var user in objUserList)
             {
@@ -152,7 +158,7 @@ namespace QuickCart.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult LockUnlock([FromBody] string id)
         {
-            var userFromDb = _db.ApplicationUsers.FirstOrDefault(u => u.Id == id);
+            var userFromDb = _unitOfWork.ApplicationUsers.Get(u => u.Id == id);
             if (userFromDb == null)
             {
                 return Json(new { success = false, message = "Error while locking/unlocking the user." });
@@ -167,7 +173,7 @@ namespace QuickCart.Areas.Admin.Controllers
                 userFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
             }
 
-            _db.SaveChanges();
+            _unitOfWork.Save();
             return Json(new { success = true, message = "Operation successful." });
         }
         #endregion
