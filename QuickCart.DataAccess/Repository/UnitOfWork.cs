@@ -20,6 +20,7 @@ namespace QuickCart.DataAccess.Repository
         public IApplicationUserRepository ApplicationUsers { get; private set; }
         public IOrderHeaderRepository OrderHeader { get; private set; }
         public IOrderDetailRepository OrderDetails { get; private set; }
+        public IProductImageRepository ProductImages { get; private set; }
         public UnitOfWork(QuickCartDbContext db)
         {
             _db = db;
@@ -31,6 +32,7 @@ namespace QuickCart.DataAccess.Repository
             ApplicationUsers = new ApplicationUserRepository(_db);
             OrderHeader = new OrderHeaderRepository(_db);
             OrderDetails = new OrderDetailRepository(_db);
+            ProductImages = new ProductImageRepository(_db);
         }
         public void Save()
         {
