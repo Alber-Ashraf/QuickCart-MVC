@@ -47,8 +47,5 @@ namespace QuickCart.Models
         [ValidateNever]
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
-
-        [ValidateNever]
-        public string ImageURL { get; set; }
     }
 }

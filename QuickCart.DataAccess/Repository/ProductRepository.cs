@@ -35,10 +35,10 @@ namespace QuickCart.DataAccess.Repository
                 objFromDb.CategoryId = obj.CategoryId;
 
                 // Only update the ImageURL if it is not null
-                if (obj.ImageURL != null)
-                {
-                    objFromDb.ImageURL = obj.ImageURL;
-                }
+                //if (obj.ImageURL != null)
+                //{
+                //    objFromDb.ImageURL = obj.ImageURL;
+                //}
             }
         }
     }

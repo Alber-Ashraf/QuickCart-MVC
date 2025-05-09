@@ -58,31 +58,29 @@ namespace QuickCart.Areas.Admin.Controllers
             // Check if the file is not null and has a valid size
             if (ModelState.IsValid)
             {
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                //string wwwRootPath = _webHostEnvironment.WebRootPath;
+                //if (file != null)
+                //{
+                //    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                //    string productPath = Path.Combine(wwwRootPath, @"images\products");
 
+                //    if (!string.IsNullOrEmpty(productVM.Product.ImageURL))
+                //    {
+                //        // If the product already has an image, delete the old image
+                //        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageURL.TrimStart('\\'));
+                //        if (System.IO.File.Exists(oldImagePath))
+                //        {
+                //            System.IO.File.Delete(oldImagePath);
+                //        }
+                //    }
 
-                if (file != null)
-                {
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath, @"images\products");
+                //    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                //    {
+                //        file.CopyTo(fileStream);
+                //    }
 
-                    if (!string.IsNullOrEmpty(productVM.Product.ImageURL))
-                    {
-                        // If the product already has an image, delete the old image
-                        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImageURL.TrimStart('\\'));
-                        if (System.IO.File.Exists(oldImagePath))
-                        {
-                            System.IO.File.Delete(oldImagePath);
-                        }
-                    }
-
-                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
-
-                    productVM.Product.ImageURL = @"\images\products\" + fileName;
-                }
+                //    productVM.Product.ImageURL = @"\images\products\" + fileName;
+                //}
 
                 if (productVM.Product.Id == 0) 
                 {
@@ -136,11 +134,11 @@ namespace QuickCart.Areas.Admin.Controllers
                 return Json(new { sucess = false, massege = "Erorr While Deleting" });
             }
 
-            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, productToBeDeleted.ImageURL.TrimStart('\\'));
-            if (System.IO.File.Exists(oldImagePath))
-            {
-                System.IO.File.Delete(oldImagePath);
-            }
+            //var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, productToBeDeleted.ImageURL.TrimStart('\\'));
+            //if (System.IO.File.Exists(oldImagePath))
+            //{
+            //    System.IO.File.Delete(oldImagePath);
+            //}
             // Remove the Product from the database
             _unitOfWork.Product.Remove(productToBeDeleted);
             _unitOfWork.Save();
