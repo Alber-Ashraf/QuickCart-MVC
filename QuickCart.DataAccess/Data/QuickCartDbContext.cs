@@ -26,6 +26,8 @@ namespace QuickCart.Data
         public DbSet<OrderHeader> OrderHeaders { get; set; }
         // Add DbSet property for OrderDetails model
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        // Add DbSet property for OrderDetails model
+        public DbSet<ProductImage> ProductImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
