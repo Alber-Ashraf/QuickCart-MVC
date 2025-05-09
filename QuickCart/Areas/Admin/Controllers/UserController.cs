@@ -120,8 +120,6 @@ namespace QuickCart.Areas.Admin.Controllers
             return RedirectToAction("Index");
         }
 
-
-
         // This method is used to get the list of Companys in JSON format for DataTables
         #region ApI Calls
         [HttpGet]
