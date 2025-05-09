@@ -16,7 +16,7 @@
                 <div class="card-body bg-light rounded-bottom-4">
                     <form asp-action="Upsert" method="post" enctype="multipart/form-data">
                         <input type="hidden" asp-for="Product.Id" />
-@*                         <input type="hidden" asp-for="Product.ImageURL" />
+                        @*                         <input type="hidden" asp-for="Product.ImageURL" />
  *@                        <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
@@ -86,8 +86,31 @@
                                 <label asp-for="Product.ProductImages" class="form-label fw-semibold">
                                     <i class="bi bi-image me-2"></i> Upload Image
                                 </label>
-                                <input type="file" name="files" class="form-control bg-white" multiple />
+                                <input type="file" name="files" class="form-control bg-white" />
                                 <span asp-validation-for="Product.ProductImages" class="text-danger small"></span>
+
+                                @if (Model.Product.ProductImages != null && Model.Product.ProductImages.Any())
+                                {
+                                    <div class="d-flex justify-content-center overflow-auto py-3" style="white-space: nowrap;">
+                                        @foreach (var image in Model.Product.ProductImages)
+                                        {
+                                            <div class="d-inline-block me-3 text-center">
+                                                <div class="card shadow-sm" style="width: 200px;">
+                                                    <img src="@image.ImageUrl"
+                                                         alt="Product Image"
+                                                         class="card-img-top rounded-top"
+                                                         style="height: 250px; object-fit: cover;" />
+                                                    <div class="card-body p-2">
+                                                        <a asp-action="DeleteImage" asp-route-imageId="@image.Id" class="btn btn-sm btn-danger rounded-pill w-100">
+                                                            <i class="bi bi-trash3"></i> Delete
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                
                             </div>
 
 

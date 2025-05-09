@@ -48,69 +48,100 @@ namespace QuickCart.Areas.Admin.Controllers
             }
             else
             {
-                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
+                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id, includedProperties: "ProductImages");
                 return View(productVM);
             }
         }
         [HttpPost]
-        public IActionResult Upsert(ProductVM productVM, List<IFormFile>? files, int? id)
+        public IActionResult Upsert(ProductVM productVM, List<IFormFile>? files)
         {
-            // Check if the file is not null and has a valid size
             if (ModelState.IsValid)
             {
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
-                if (files != null)
+                // Check if it's Create or Update
+                if (productVM.Product.Id == 0)
                 {
-                    // Loop through each file in the list
-                    foreach (IFormFile file in files) 
-                    {
-                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                        string productPath = @"images\products\product-" + productVM.Product.Id;
-                        string finalPath = Path.Combine(wwwRootPath, productPath);
-
-                        // Check if the directory exists, if not create it
-                        if (!Directory.Exists(finalPath))
-                            Directory.CreateDirectory(finalPath);
-
-                        using (var fileStream = new FileStream(Path.Combine(finalPath, fileName), FileMode.Create))
-                        {
-                            file.CopyTo(fileStream);
-                        }
-
-                        // Create a new ProductImage object
-                        ProductImage productImage = new()
-                        {
-                            ImageUrl = @"\" + productPath + @"\" + fileName,
-                            ProductId = productVM.Product.Id,
-                        };
-
-                        // Check if the Product already has images
-                        if (productVM.Product.ProductImages == null)
-                            productVM.Product.ProductImages = new List<ProductImage>();
-
-                        productVM.Product.ProductImages.Add(productImage);
-                    }
-
+                    // Create Product first to generate ID
+                    _unitOfWork.Product.Add(productVM.Product);
+                    _unitOfWork.Save();
+                }
+                else
+                {
+                    // Update existing product fields (excluding images here)
                     _unitOfWork.Product.Update(productVM.Product);
                     _unitOfWork.Save();
                 }
 
-                TempData["success"] = "Product created/updated successfully";
+                // Handle image upload
+                if (files != null && files.Count > 0)
+                {
+                    string wwwRootPath = _webHostEnvironment.WebRootPath;
+                    string productPath = Path.Combine("images", "products", "product-" + productVM.Product.Id);
+                    string finalPath = Path.Combine(wwwRootPath, productPath);
 
+                    if (!Directory.Exists(finalPath))
+                        Directory.CreateDirectory(finalPath);
+
+                    foreach (IFormFile file in files)
+                    {
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        string filePath = Path.Combine(finalPath, fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            file.CopyTo(stream);
+                        }
+
+                        // Save relative path to DB
+                        ProductImage image = new ProductImage
+                        {
+                            ImageUrl = "/" + Path.Combine(productPath, fileName).Replace("\\", "/"),
+                            ProductId = productVM.Product.Id
+                        };
+
+                        _unitOfWork.ProductImage.Add(image); // تأكد إن عندك access لـ ProductImage repo
+                    }
+
+                    _unitOfWork.Save();
+                }
+
+                TempData["success"] = "Product created/updated successfully";
                 return RedirectToAction("Index");
             }
-            // If model state is not valid, return the view with the current model
-            else
+
+            // If not valid, return view with categories loaded
+            productVM.CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
             {
-                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                });
-                return View(productVM);
-            }
+                Text = i.Name,
+                Value = i.Id.ToString()
+            });
+
+            return View(productVM);
         }
-        
+
+        public IActionResult DeleteImage(int? imageId)
+        {
+            var imageToBeDeleted = _unitOfWork.ProductImage.Get(u => u.Id == imageId);
+            int productId = imageToBeDeleted.ProductId;
+
+            if (imageToBeDeleted != null)
+            {
+                if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
+                {
+                    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, imageToBeDeleted.ImageUrl.TrimStart('\\'));
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+                // Remove the image from the database
+                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+                _unitOfWork.Save();
+
+                TempData["success"] = "Image deleted successfully";
+            }
+                return RedirectToAction(nameof(Upsert), new { id = productId });
+        }
+
         // This method is used to get the list of Products in JSON format for DataTables
         #region ApI Calls
         [HttpGet]
@@ -137,6 +168,7 @@ namespace QuickCart.Areas.Admin.Controllers
             //{
             //    System.IO.File.Delete(oldImagePath);
             //}
+
             // Remove the Product from the database
             _unitOfWork.Product.Remove(productToBeDeleted);
             _unitOfWork.Save();

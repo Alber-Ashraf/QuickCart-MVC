@@ -16,7 +16,7 @@ namespace QuickCart.DataAccess.Repository.IRepository
         IApplicationUserRepository ApplicationUsers { get; }
         IOrderHeaderRepository OrderHeader { get; }
         IOrderDetailRepository OrderDetails { get; }
-        IProductImageRepository ProductImages { get; }
+        IProductImageRepository ProductImage { get; }
         public void Save();
     }
 }

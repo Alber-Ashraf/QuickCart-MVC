@@ -11,7 +11,7 @@
             <h4 class="mb-0">
                 <i class="bi bi-cart4 me-2"></i> Your Shopping Cart
             </h4>
-            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-light fw-bold rounded-pill shadow-sm">
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-light nav-link text-light">
                 <i class="bi bi-arrow-left-circle me-1"></i> Continue Shopping
             </a>
         </div>
@@ -22,27 +22,40 @@
             {
                 @foreach (var item in Model.ShoppingCartList)
                 {
-                    <div class="row bg-white border rounded-4 shadow-sm my-3 py-3 px-2 align-items-center hover-shadow transition">
+                    <div class="row g-0 bg-white border rounded-4 shadow-sm my-3 py-3 px-2 align-items-center position-relative">
                         <!-- Product Image -->
-                        @* <div class="col-4 col-md-2 text-center">
-                            <img src="@item.Product.ImageURL" class="img-fluid rounded-3 shadow-sm" style="max-height: 100px;" alt="@item.Product.Title" />
-                        </div> *@
+                        <div class="col-md-2 text-center">
+                            @if (item.Product.ProductImages != null && item.Product.ProductImages.Any())
+                            {
+                                <img src="@Url.Content(item.Product.ProductImages.First().ImageUrl)"
+                                     class="img-fluid rounded-4  bg-white"
+                                     style="width: 100%; height: 150px; object-fit: contain;" />
+                            }
+                            else
+                            {
+                                <img src="https://placehold.co/500x600/png"
+                                     class="img-fluid rounded-4 bg-white"
+                                     style="width: 100%; height: 150px; object-fit: contain;" />
+                            }
+                        </div>
 
                         <!-- Product Details -->
-                        <div class="col-8 col-md-4">
-                            <h5 class="text-dark mb-1 fw-bold text-uppercase">@item.Product.Title</h5>
-                            <p class="mb-1 text-muted"><small>@item.Product.Author</small></p>
+                        <div class="col-md-7">
+                            <h5 class="text-dark fw-bold mb-1">@item.Product.Title</h5>
+                            <p class="mb-0 text-muted"><small>@item.Product.Author</small></p>
                             <p class="text-muted small d-none d-md-block">@Html.Raw(item.Product.Description)</p>
                         </div>
 
                         <!-- Quantity & Price -->
-                        <div class="col-12 col-md-6 mt-3 mt-md-0 text-center text-md-end">
+                        <div class="col-md-3 text-center text-md-end mt-3 mt-md-0">
                             <div class="d-flex justify-content-center justify-content-md-end align-items-center mb-2">
-                                <a asp-action="minus" asp-route-cartId="@item.Id" class="btn btn-outline-secondary btn-sm rounded-circle me-1">
+                                <a asp-action="minus" asp-route-cartId="@item.Id" class="btn btn-outline-secondary btn-sm rounded-circle me-2">
                                     <i class="bi bi-dash"></i>
                                 </a>
-                                <span class="fw-bold mx-2 fs-5">@item.Count</span>
-                                <a asp-action="plus" asp-route-cartId="@item.Id" class="btn btn-outline-secondary btn-sm rounded-circle ms-1">
+
+                                <span id="count-@item.Id" class="fw-bold mx-2 fs-5">@item.Count</span>
+
+                                <a href="#" onclick="validateMax(@item.Id, @item.Count)" class="btn btn-outline-secondary btn-sm rounded-circle ms-2">
                                     <i class="bi bi-plus"></i>
                                 </a>
                             </div>
@@ -87,3 +100,15 @@
         }
     </div>
 </div>
+
+<!-- Quantity Validation Script -->
+<script>
+    function validateMax(cartId, currentCount) {
+        if (currentCount >= 1000) {
+            alert("You cannot order more than 1000 items.");
+            return false;
+        } else {
+            window.location.href = '/Customer/Cart/plus?cartId=' + cartId;
+        }
+    }
+</script>
