@@ -15,11 +15,13 @@ namespace QuickCart.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IBlobService _blobService;
 
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IBlobService blobService)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            _blobService = blobService;
         }
 
         public IActionResult Index()
@@ -53,52 +55,36 @@ namespace QuickCart.Areas.Admin.Controllers
             }
         }
         [HttpPost]
-        public IActionResult Upsert(ProductVM productVM, List<IFormFile>? files)
+        public async Task<IActionResult> Upsert(ProductVM productVM, List<IFormFile>? files)
         {
             if (ModelState.IsValid)
             {
-                // Check if it's Create or Update
                 if (productVM.Product.Id == 0)
                 {
-                    // Create Product first to generate ID
                     _unitOfWork.Product.Add(productVM.Product);
                     _unitOfWork.Save();
                 }
                 else
                 {
-                    // Update existing product fields (excluding images here)
                     _unitOfWork.Product.Update(productVM.Product);
                     _unitOfWork.Save();
                 }
 
-                // Handle image upload
                 if (files != null && files.Count > 0)
                 {
-                    string wwwRootPath = _webHostEnvironment.WebRootPath;
-                    string productPath = Path.Combine("images", "products", "product-" + productVM.Product.Id);
-                    string finalPath = Path.Combine(wwwRootPath, productPath);
-
-                    if (!Directory.Exists(finalPath))
-                        Directory.CreateDirectory(finalPath);
-
                     foreach (IFormFile file in files)
                     {
                         string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                        string filePath = Path.Combine(finalPath, fileName);
 
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            file.CopyTo(stream);
-                        }
+                        string imageUrl = await _blobService.UploadFileAsync(file, fileName);
 
-                        // Save relative path to DB
                         ProductImage image = new ProductImage
                         {
-                            ImageUrl = "/" + Path.Combine(productPath, fileName).Replace("\\", "/"),
+                            ImageUrl = imageUrl,
                             ProductId = productVM.Product.Id
                         };
 
-                        _unitOfWork.ProductImage.Add(image); // تأكد إن عندك access لـ ProductImage repo
+                        _unitOfWork.ProductImage.Add(image);
                     }
 
                     _unitOfWork.Save();
@@ -108,17 +94,10 @@ namespace QuickCart.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            // If not valid, return view with categories loaded
-            productVM.CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
-            {
-                Text = i.Name,
-                Value = i.Id.ToString()
-            });
-
             return View(productVM);
         }
 
-        public IActionResult DeleteImage(int? imageId)
+        public async Task<IActionResult> DeleteImageAsync(int? imageId)
         {
             var imageToBeDeleted = _unitOfWork.ProductImage.Get(u => u.Id == imageId);
             int productId = imageToBeDeleted.ProductId;
@@ -127,19 +106,23 @@ namespace QuickCart.Areas.Admin.Controllers
             {
                 if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
                 {
-                    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, imageToBeDeleted.ImageUrl.TrimStart('\\'));
+                    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, imageToBeDeleted.ImageUrl.TrimStart('/'));
                     if (System.IO.File.Exists(oldImagePath))
                     {
                         System.IO.File.Delete(oldImagePath);
                     }
+
+                    string blobName = Path.GetFileName(imageToBeDeleted.ImageUrl);
+                    await _blobService.DeleteFileFromBlob(blobName);
                 }
-                // Remove the image from the database
+
                 _unitOfWork.ProductImage.Remove(imageToBeDeleted);
                 _unitOfWork.Save();
 
                 TempData["success"] = "Image deleted successfully";
             }
-                return RedirectToAction(nameof(Upsert), new { id = productId });
+
+            return RedirectToAction(nameof(Upsert), new { id = productId });
         }
 
         // This method is used to get the list of Products in JSON format for DataTables
