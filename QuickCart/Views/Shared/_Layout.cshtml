@@ -9,6 +9,9 @@
 
     <title>@ViewData["Title"] - QuickCart</title>
 
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
@@ -18,23 +21,35 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css">
 
-    <!-- Site-wide Styles -->
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuickCart.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="~/favicon.png" />
-
 </head>
 
 <body class="d-flex flex-column min-vh-80 bg-light">
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="dot-loader">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <p class="fw-bold mt-4">Loading...</p>
+    </div>
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark shadow-sm border-bottom">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-info" asp-area="" asp-controller="Home" asp-action="Index">QuickCart</a>
+                <a class="navbar-brand text-info" asp-area="" asp-controller="Home" asp-action="Index">QuickCart</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
@@ -75,12 +90,12 @@
                                         <li><hr class="dropdown-divider bg-secondary"></li>
                                         <li>
                                             <a class="dropdown-item text-light" asp-area="Identity" asp-page="/Account/Register">
-                                                <i class="bi bi-building me-2"></i> Register User
+                                                <i class="bi bi-person-plus me-2 text-success"></i> Register User
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item text-light" asp-area="Admin" asp-controller="User" asp-action="Index">
-                                                <i class="bi bi-building me-2"></i> Users
+                                                <i class="bi bi-people-fill me-2 text-warning"></i> Users
                                             </a>
                                         </li>
                                     }
@@ -91,7 +106,7 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-area="Customer" asp-controller="Cart" asp-action="Index">
-									@await Component.InvokeAsync("ShoppingCart")
+                                    @await Component.InvokeAsync("ShoppingCart")
                                 </a>
                             </li>
                         }
@@ -104,45 +119,33 @@
 
     <div class="container my-4 flex-grow-1">
         <main role="main" class="pb-3">
-			<partial name="_Notification" />
-
-            @* <!-- Splash Screen with Dot Loader -->
-            <div id="preloader">
-                <div class="dot-loader">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <p class="text-white fw-bold mt-4">Loading...</p>
-            </div> *@
-
+            <partial name="_Notification" />
             @RenderBody()
         </main>
     </div>
 
-<footer class="footer mt-auto py-1 bg-dark text-light border-top shadow-sm">
-    <div class="container text-center">
-        <em class="text-secondary fs-6" style="font-size: 0.75rem;">
-            "At <span class="text-info">QuickCart</span>, every click brings you closer to your dreams."
-        </em>
-    </div>
-</footer>
+    <footer class="footer mt-auto py-1 bg-dark text-light border-top shadow-sm">
+        <div class="container text-center">
+            <em class="text-secondary fs-6">"At <span class="text-info">QuickCart</span>, every click brings you closer to your dreams."</em>
+        </div>
+    </footer>
 
-	<!-- jQuery and Bootstrap JS -->
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- DataTables JS -->
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
-
-	<!-- Toastr JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script>
+        // Preloader hide
+        $(window).on("load", function () {
+            $('#preloader').fadeOut('slow');
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-
 </html>
