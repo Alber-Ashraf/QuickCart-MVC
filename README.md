@@ -61,17 +61,42 @@ dotnet run
 
 ## 📁 Folder Structure
 ```
-QuickCart/
+📦 QuickCart.sln
 │
-├── Controllers/            # MVC Controllers
-├── Models/                 # Domain models
-├── Views/                  # Razor views
-├── Data/                  
-│   └── QuickCartDbContext.cs
-├── Services/               # Interfaces & business logic
-├── wwwroot/                # Static files
-├── appsettings.json        # Configuration
-└── Program.cs / Startup.cs # App entry
+├── 📁 QuickCart                            # ASP.NET Core Web Project (MVC)
+│   ├── 📁 Areas
+│   │   ├── 📁 Admin                        # Admin area (controllers, views, etc.)
+│   │   ├── 📁 Customer                     # Customer area
+│   │   └── 📁 Identity
+│   │       └── 📁 Pages                    # Identity UI pages (login, register...)
+│   │
+│   ├── 📁 Properties                       # Project-specific settings (launchSettings.json)
+│   ├── 📁 ViewComponents                   # Custom View Components
+│   ├── 📁 Views                            # Shared views (e.g., _Layout, Error)
+│   ├── 📁 wwwroot                          # Static files (CSS, JS, images)
+│   ├── 📄 Program.cs                       # Application startup (entry point)
+│   └── 📄 appsettings.json                 # Application configuration settings
+│
+├── 📁 QuickCart.DataAccess                 # Data Access Layer (DAL)
+│   ├── 📁 Data                             # ApplicationDbContext and configuration
+│   ├── 📁 DbInitializer                    # Seed data & DB initialization
+│   ├── 📁 Migrations                       # EF Core database migrations
+│   └── 📁 Repository                       # Repository pattern implementation
+│
+├── 📁 QuickCart.Models                     # Entity and ViewModel definitions
+│   ├── 📁 ViewModels                       # ViewModel classes
+│   ├── 📄 ApplicationUser.cs               # Custom identity user class
+│   ├── 📄 Category.cs                      # Category entity
+│   ├── 📄 Company.cs                       # Company entity
+│   ├── 📄 ErrorViewModel.cs                # Error ViewModel
+│   ├── 📄 OrderDetail.cs                   # Order detail entity
+│   ├── 📄 OrderHeader.cs                   # Order header entity
+│   ├── 📄 Product.cs                       # Product entity
+│   ├── 📄 ProductImage.cs                  # Product image entity
+│   ├── 📄 ShoppingCart.cs                  # Shopping cart entity
+│   └── 📄 QuickCart.Models.csproj          # Project file
+│
+└── 📁 QuickCart.Utility                    # Utility classes and constants (e.g., SD.cs, helpers)
 ```
 ## 🧪 Contributing
 ```
