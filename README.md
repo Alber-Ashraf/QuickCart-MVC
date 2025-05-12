@@ -56,7 +56,7 @@ Update-Database
 ```
 ### 4. Run the Application
 ```
-Update-Database
+dotnet run
 ```
 
 ## 📁 Folder Structure
