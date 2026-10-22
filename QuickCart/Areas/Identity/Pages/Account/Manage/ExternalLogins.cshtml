@@ -58,7 +58,7 @@
                 @foreach (var provider in Model.OtherLogins)
                 {
                     <button id="@($"link-login-button-{provider.Name}")" type="submit"
-                            class="btn btn-outline-light"
+                            class="btn btn-outline-light no-spinner"
                             name="provider" value="@provider.Name"
                             title="Link your @provider.DisplayName account">
                         <i class="bi bi-link-45deg"></i> @provider.DisplayName

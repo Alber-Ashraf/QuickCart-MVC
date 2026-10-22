@@ -1,63 +1,191 @@
 ﻿@model IEnumerable<Product>
+@using QuickCart.Models.ViewModels
 
-<div class="container py-5">
-    <h2 class="text-center mb-5 fw-bold display-6 text-dark">
-        📦 Explore Our Latest Products
-    </h2>
+@{
+    ViewData["Title"] = "Storefront Catalog";
+    var categories = ViewBag.Categories as IEnumerable<Category> ?? Enumerable.Empty<Category>();
+    int? selectedCategory = ViewBag.SelectedCategory as int?;
+    string? searchQuery = ViewBag.SearchQuery as string;
+    var totalProducts = Model?.Count() ?? 0;
+}
 
-    <div class="row g-4">
-        @foreach (var product in Model)
-        {
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                <div class="card h-100 shadow-sm border-0 rounded-4 position-relative">
+@section Breadcrumbs {
+    <span class="current">Storefront Catalog</span>
+}
 
-                    <!-- Badge -->
-                    <span class="position-absolute top-0 end-0 m-2 badge bg-danger px-3 py-2 rounded-pill shadow-sm">New</span>
+<div class="storefront-container py-2">
+    <!-- Hero / Category Header Bar -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="page-title mb-1">
+                <i class="bi bi-book me-2 text-primary"></i> Explore Book Catalog
+            </h1>
+            <p class="page-subtitle mb-0">Discover literary collections, publisher editions, and wholesale titles.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-surface border border-subtle text-secondary px-3 py-2 rounded-pill font-mono">
+                <i class="bi bi-journal-bookmark me-1 text-primary"></i> @totalProducts @(totalProducts == 1 ? "Title" : "Titles")
+            </span>
+        </div>
+    </div>
 
-                    <!-- Product Image -->
-                    @{
-                        var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl;
-                    }
-
-                    @if (!string.IsNullOrEmpty(imageUrl))
-                    {
-                        <img src="@imageUrl" alt="@product.Title"
-                             class="card-img-top rounded-top-4"
-                             style="height: 220px; object-fit: cover;" />
-                    }
-                    else
-                    {
-                        <img src="https://placehold.co/500x600/png?text=No+Image"
-                             class="card-img-top rounded-top-4"
-                             style="height: 220px; object-fit: cover;" />
-                    }
-
-                    <div class="card-body d-flex flex-column p-4">
-                        <h5 class="card-title fw-bold mb-1 text-dark">@product.Title</h5>
-                        <p class="text-muted small mb-2">by <span class="fw-semibold">@product.Author</span></p>
-
-                        <p class="text-primary small mb-2">
-                            <i class="bi bi-tag-fill me-1"></i> @product.Category?.Name
-                        </p>
-
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="fw-bold text-decoration-line-through text-muted">
-                                @product.ListPrice.ToString("C")
-                            </span>
-                            <span class="text-secondary">→</span>
-                            <span class="fw-bold text-success fs-5">
-                                @product.Price.ToString("C")
-                            </span>
-                        </div>
-
-                        <a asp-action="Details"
-                           asp-route-productId="@product.Id"
-                           class="btn btn-outline-dark w-100 mt-auto rounded-pill shadow-sm">
-                            <i class="bi bi-eye-fill me-1"></i> View Product
-                        </a>
+    <!-- Search & Filter Card -->
+    <div class="qc-card mb-4">
+        <div class="p-3">
+            <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                <input type="hidden" name="categoryId" value="@selectedCategory" />
+                <div class="col-md-9 col-sm-8">
+                    <div class="input-icon-group">
+                        <i class="bi bi-search input-prefix-icon"></i>
+                        <input type="text"
+                               name="search"
+                               id="globalSearchInput"
+                               value="@searchQuery"
+                               class="form-control qc-input"
+                               placeholder="Search catalog by title, author, or ISBN (Press / or Ctrl+K)..." />
                     </div>
+                </div>
+                <div class="col-md-3 col-sm-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary qc-btn-primary flex-grow-1 justify-content-center">
+                        <i class="bi bi-search me-1"></i> Search
+                    </button>
+                    @if (!string.IsNullOrEmpty(searchQuery) || selectedCategory.HasValue)
+                    {
+                        <a asp-action="Index" class="btn btn-outline-secondary qc-btn-secondary" title="Clear All Filters">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+
+        <!-- Category Horizontal Segmented Scroll Bar -->
+        @if (categories.Any())
+        {
+            <div class="px-3 pb-3 border-top border-subtle pt-3">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="small text-muted fw-semibold me-1">
+                        <i class="bi bi-funnel me-1"></i> Category:
+                    </span>
+                    <a asp-action="Index"
+                       asp-route-search="@searchQuery"
+                       class="btn btn-sm @(!selectedCategory.HasValue ? "btn-primary qc-btn-primary" : "btn-outline-secondary qc-btn-secondary") rounded-pill px-3 py-1">
+                        All Items
+                    </a>
+                    @foreach (var cat in categories)
+                    {
+                        var isActive = selectedCategory == cat.Id;
+                        <a asp-action="Index"
+                           asp-route-categoryId="@cat.Id"
+                           asp-route-search="@searchQuery"
+                           class="btn btn-sm @(isActive ? "btn-primary qc-btn-primary" : "btn-outline-secondary qc-btn-secondary") rounded-pill px-3 py-1">
+                            @cat.Name
+                        </a>
+                    }
                 </div>
             </div>
         }
     </div>
+
+    <!-- Product Grid or Empty State -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var product in Model)
+            {
+                var imageUrl = product.ProductImages?.FirstOrDefault()?.ImageUrl;
+                var hasDiscount = product.ListPrice > product.Price;
+                var discountPct = hasDiscount ? Math.Round(((product.ListPrice - product.Price) / product.ListPrice) * 100) : 0;
+
+                <div class="col-12 col-sm-6 col-md-4 col-xl-3">
+                    <div class="qc-card h-100 d-flex flex-column position-relative overflow-hidden transition-fast">
+                        <!-- Discount Badge -->
+                        @if (hasDiscount)
+                        {
+                            <span class="position-absolute top-0 end-0 m-3 qc-badge qc-badge-danger z-2 shadow-sm font-mono">
+                                -@discountPct%
+                            </span>
+                        }
+
+                        <!-- Category Pill -->
+                        <span class="position-absolute top-0 start-0 m-3 qc-badge qc-badge-accent z-2 shadow-sm">
+                            <i class="bi bi-tag-fill me-1"></i> @(product.Category?.Name ?? "General")
+                        </span>
+
+                        <!-- Product Thumbnail Canvas -->
+                        <div class="p-4 d-flex align-items-center justify-content-center bg-subtle" style="height: 240px;">
+                            @if (!string.IsNullOrEmpty(imageUrl))
+                            {
+                                <img src="@imageUrl"
+                                     alt="@product.Title"
+                                     loading="lazy"
+                                     class="img-fluid rounded-2 shadow-sm"
+                                     style="max-height: 200px; max-width: 100%; object-fit: contain;" />
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+                                    <i class="bi bi-book fs-1 mb-2"></i>
+                                    <span class="small font-mono">Flyleaf Edition</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Card Body Content -->
+                        <div class="p-4 d-flex flex-column flex-grow-1">
+                            <h3 class="fs-6 fw-bold text-primary mb-1 text-truncate" title="@product.Title">
+                                @product.Title
+                            </h3>
+                            <p class="text-muted small mb-3 text-truncate">
+                                by <span class="fw-semibold text-secondary">@product.Author</span>
+                            </p>
+
+                            <!-- Volume Discount Teaser -->
+                            <div class="p-2 bg-surface-hover rounded-2 border border-subtle mb-3 small">
+                                <div class="d-flex justify-content-between align-items-center text-muted">
+                                    <span>Bulk (100+):</span>
+                                    <span class="font-mono fw-bold text-success">@product.Price100.ToString("C")</span>
+                                </div>
+                            </div>
+
+                            <!-- Pricing Breakdown -->
+                            <div class="d-flex align-items-baseline gap-2 mb-3 mt-auto">
+                                <span class="fs-4 fw-bold font-mono text-primary price-value">
+                                    @product.Price.ToString("C")
+                                </span>
+                                @if (hasDiscount)
+                                {
+                                    <span class="text-decoration-line-through text-muted small font-mono">
+                                        @product.ListPrice.ToString("C")
+                                    </span>
+                                }
+                                <span class="text-muted small ms-auto">per unit</span>
+                            </div>
+
+                            <!-- Action CTA -->
+                            <a asp-action="Details"
+                               asp-route-productId="@product.Id"
+                               class="btn btn-outline-secondary qc-btn-secondary w-100 justify-content-center">
+                                <i class="bi bi-arrow-right-circle me-1"></i> View & Configure
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        var emptyState = new EmptyStateVM
+        {
+            Title = "No products found",
+            Description = !string.IsNullOrEmpty(searchQuery)
+                ? $"No products matched your search term '{searchQuery}'. Try adjusting your query or resetting category filters."
+                : "There are currently no products available in the selected category.",
+            IconClass = "bi bi-search",
+            ActionText = "View All Products",
+            ActionUrl = Url.Action("Index", "Home", new { area = "Customer" })
+        };
+        <partial name="_EmptyState" model="@emptyState" />
+    }
 </div>

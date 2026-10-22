@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using QuickCart.Data;
-using QuickCart.DataAccess.Repository;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
 using QuickCart.Models.ViewModels;
@@ -26,50 +27,44 @@ namespace QuickCart.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            // Pass the list to the View
             return View();
         }
 
-        public IActionResult ManagePermission(string? id)
+        public async Task<IActionResult> ManagePermission(string? id)
         {
             if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var userFromDb = _unitOfWork.ApplicationUsers
-                .GetAll(includedProperties: "Company")
-                .FirstOrDefault(u => u.Id == id);
+            var userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(
+                u => u.Id == id,
+                includedProperties: "Company");
 
             if (userFromDb == null)
             {
                 return NotFound();
             }
 
-            // Get the list of all user roles and roles
-            var userRoles = _unitOfWork.UserRoles.GetAll();
-            var roles = _unitOfWork.Roles.GetAll();
+            var roles = await _unitOfWork.Roles.GetAllAsync();
+            var companies = await _unitOfWork.Company.GetAllAsync();
 
-            // Get the role name for the user
-            var userRole = (from ur in userRoles
-                            join r in roles on ur.RoleId equals r.Id
-                            where ur.UserId == id
-                            select r.Name).FirstOrDefault();
+            var userRoleRecord = await _unitOfWork.UserRoles.GetAsync(ur => ur.UserId == id);
+            var userRole = userRoleRecord != null
+                ? roles.FirstOrDefault(r => r.Id == userRoleRecord.RoleId)?.Name
+                : null;
 
             userFromDb.Role = userRole;
 
-            // Create a new UserVM object and populate it with the user data
             UserVM userVM = new()
             {
                 ApplicationUser = userFromDb,
-
-                Role_List = _unitOfWork.Roles.GetAll().Select(role => new SelectListItem
+                Role_List = roles.Select(role => new SelectListItem
                 {
                     Text = role.Name,
                     Value = role.Name
                 }),
-
-                Company_List = _unitOfWork.Company.GetAll().Select(company => new SelectListItem
+                Company_List = companies.Select(company => new SelectListItem
                 {
                     Text = company.Name,
                     Value = company.Id.ToString()
@@ -80,86 +75,99 @@ namespace QuickCart.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult ManagePermission(UserVM userVM)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManagePermission(UserVM userVM)
         {
-            var userFromDb = _unitOfWork.ApplicationUsers.Get(u => u.Id == userVM.ApplicationUser.Id);
+            var userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(
+                u => u.Id == userVM.ApplicationUser.Id,
+                tracked: true);
+
             if (userFromDb == null)
             {
                 return NotFound();
             }
 
-            // 1. Update CompanyId
+            // Update CompanyId
             userFromDb.CompanyId = userVM.ApplicationUser.CompanyId;
 
-            // 2. Remove existing role
-            var userRole = _unitOfWork.UserRoles.Get(x => x.UserId == userVM.ApplicationUser.Id);
-            if (userRole != null)
+            // Remove existing role
+            var existingUserRole = await _unitOfWork.UserRoles.GetAsync(x => x.UserId == userVM.ApplicationUser.Id, tracked: true);
+            if (existingUserRole != null)
             {
-                _unitOfWork.UserRoles.Remove(userRole);
+                _unitOfWork.UserRoles.Remove(existingUserRole);
             }
 
-            // 3. Assign new role
-            var newRole = _unitOfWork.Roles.Get(x => x.Name == userVM.ApplicationUser.Role);
+            // Assign new role
+            var newRole = await _unitOfWork.Roles.GetAsync(x => x.Name == userVM.ApplicationUser.Role);
             if (newRole != null)
             {
-                _unitOfWork.UserRoles.Add(new IdentityUserRole<string>
+                await _unitOfWork.UserRoles.AddAsync(new IdentityUserRole<string>
                 {
                     UserId = userFromDb.Id,
                     RoleId = newRole.Id
                 });
             }
 
-            // 4. Update the user in the database
-            userFromDb.CompanyId = userVM.ApplicationUser.CompanyId;
-
             _unitOfWork.ApplicationUsers.Update(userFromDb);
-            _unitOfWork.Save();
+            await _unitOfWork.SaveAsync();
 
-            // 4. Show success message
             TempData["success"] = "User permissions updated successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
-        // This method is used to get the list of Companys in JSON format for DataTables
-        #region ApI Calls
+        #region API Calls
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            // Fetch the list of Companys from the database
-            List<ApplicationUser> objUserList = _unitOfWork.ApplicationUsers.GetAll(includedProperties: "Company").ToList();
+            var objUserList = (await _unitOfWork.ApplicationUsers.GetAllAsync(includedProperties: "Company")).ToList();
+            var userRoles = await _unitOfWork.UserRoles.GetAllAsync();
+            var roles = await _unitOfWork.Roles.GetAllAsync();
 
-            var userRole = _unitOfWork.UserRoles.GetAll().ToList();
-            var role = _unitOfWork.Roles.GetAll().ToList();
+            var roleDict = roles.ToDictionary(r => r.Id, r => r.Name ?? SD.Role_Customer);
+            var userRoleDict = userRoles
+                .Where(ur => !string.IsNullOrEmpty(ur.UserId) && !string.IsNullOrEmpty(ur.RoleId))
+                .GroupBy(ur => ur.UserId)
+                .ToDictionary(g => g.Key, g => g.First().RoleId);
 
-            foreach (var user in objUserList)
+            var sanitizedUsers = objUserList.Select(user =>
             {
-                // Get the role of the user
-                var roleId = userRole.FirstOrDefault(x => x.UserId == user.Id).RoleId;
-                user.Role = role.FirstOrDefault(x => x.Id == roleId).Name;
+                var roleName = userRoleDict.TryGetValue(user.Id, out var roleId) && roleDict.TryGetValue(roleId, out var name)
+                    ? name
+                    : SD.Role_Customer;
 
-                if (user.Company == null)
+                return new
                 {
-                    // If the Company is not null, set the Company name
-                    user.Company = new Company
-                    {
-                        Name = ""
-                    };
-                }
+                    id = user.Id,
+                    name = user.Name ?? "",
+                    email = user.Email ?? "",
+                    phoneNumber = user.PhoneNumber ?? "",
+                    company = new { name = user.Company?.Name ?? "" },
+                    role = roleName,
+                    lockoutEnd = user.LockoutEnd
+                };
+            }).ToList();
 
+            return Json(new { data = sanitizedUsers });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LockUnlock([FromBody] string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return Json(new { success = false, message = "Invalid user ID." });
             }
 
-            // Return the list as JSON
-            return Json(new { data = objUserList });
-        }
+            var currentAdminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentAdminId == id)
+            {
+                return Json(new { success = false, message = "You cannot lock your own administrator account." });
+            }
 
-        // This method is used to get the details of a specific Company for editing
-        [HttpPost]
-        public IActionResult LockUnlock([FromBody] string id)
-        {
-            var userFromDb = _unitOfWork.ApplicationUsers.Get(u => u.Id == id);
+            var userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.Id == id, tracked: true);
             if (userFromDb == null)
             {
-                return Json(new { success = false, message = "Error while locking/unlocking the user." });
+                return Json(new { success = false, message = "User not found." });
             }
 
             if (userFromDb.LockoutEnd != null && userFromDb.LockoutEnd > DateTime.Now)
@@ -171,11 +179,9 @@ namespace QuickCart.Areas.Admin.Controllers
                 userFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
             }
 
-            _unitOfWork.Save();
-            return Json(new { success = true, message = "Operation successful." });
+            await _unitOfWork.SaveAsync();
+            return Json(new { success = true, message = "User status updated successfully." });
         }
         #endregion
-
     }
 }
-

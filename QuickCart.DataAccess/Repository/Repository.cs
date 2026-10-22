@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using QuickCart.Data;
@@ -14,49 +14,27 @@ namespace QuickCart.DataAccess.Repository
     {
         private readonly QuickCartDbContext _db;
         internal DbSet<T> dbSet;
+
         public Repository(QuickCartDbContext db)
         {
             _db = db;
             this.dbSet = _db.Set<T>();
-            _db.Products.Include(u => u.Category);
         }
 
-        // This method is used to add a new entity to the database
         public void Add(T entity)
         {
             dbSet.Add(entity);
         }
 
-        // This method is used to get a single entity from the database
-        public T Get(Expression<Func<T, bool>> filter, string? includedProperties = null, bool tracked = false)
+        public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
-            IQueryable<T> query;
-            // If tracked is true, we want to use the tracked version of the entity
-            if (tracked)
-            {
-                query = dbSet;
-            }
-            // If tracked is false, we want to use the untracked version of the entity
-            else
-            {
-                query = dbSet.AsNoTracking();
-            }
-
-            query = query.Where(filter);
-            if (!string.IsNullOrEmpty(includedProperties))
-            {
-                foreach (var includeProperty in includedProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    query = query.Include(includeProperty);
-                }
-            }
-            return query.FirstOrDefault();
+            await dbSet.AddAsync(entity, cancellationToken);
         }
 
-        // This method is used to get all entities from the database
-        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includedProperties = null, bool tracking = true)
+        private IQueryable<T> BuildQuery(Expression<Func<T, bool>>? filter = null, string? includedProperties = null, bool tracking = true)
         {
-            IQueryable<T> query = dbSet;
+            IQueryable<T> query = tracking ? dbSet : dbSet.AsNoTracking();
+
             if (filter != null)
             {
                 query = query.Where(filter);
@@ -66,26 +44,41 @@ namespace QuickCart.DataAccess.Repository
             {
                 foreach (var includeProperty in includedProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                    query = query.Include(includeProperty);
+                    query = query.Include(includeProperty.Trim());
                 }
             }
-            if (!tracking)
-            {
-                query = query.AsNoTracking();
-            }
-            return query.ToList();
+
+            return query;
         }
 
-        // This method is used to remove an entity from the database
+        public T? Get(Expression<Func<T, bool>> filter, string? includedProperties = null, bool tracked = false)
+        {
+            return BuildQuery(filter, includedProperties, tracked).FirstOrDefault();
+        }
+
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> filter, string? includedProperties = null, bool tracked = false, CancellationToken cancellationToken = default)
+        {
+            return await BuildQuery(filter, includedProperties, tracked).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includedProperties = null, bool tracking = true)
+        {
+            return BuildQuery(filter, includedProperties, tracking).ToList();
+        }
+
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includedProperties = null, bool tracking = true, CancellationToken cancellationToken = default)
+        {
+            return await BuildQuery(filter, includedProperties, tracking).ToListAsync(cancellationToken);
+        }
+
         public void Remove(T entity)
         {
             dbSet.Remove(entity);
         }
 
-        // This method is used to remove a range of entities from the database
-        public void RemoveRange(IEnumerable<T> entity)
+        public void RemoveRange(IEnumerable<T> entities)
         {
-            dbSet.RemoveRange(entity);
+            dbSet.RemoveRange(entities);
         }
     }
 }

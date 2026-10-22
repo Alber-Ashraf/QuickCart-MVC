@@ -1,81 +1,77 @@
-﻿@{
-    ViewData["Title"] = "Order List";
-}
+﻿@using QuickCart.Models.ViewModels
 
 @{
-    var status = Context.Request.Query["status"].ToString();
-    var inprocess = "text-primary";
-    var pending = "text-primary";
-    var completed = "text-primary";
-    var approved = "text-primary";
-    var all = "text-primary";
+    ViewData["Title"] = "Order Management";
+    var status = Context.Request.Query["status"].ToString().ToLower();
+    if (string.IsNullOrEmpty(status)) status = "all";
 
-    switch (status)
+    var pageHeader = new PageHeaderVM
     {
-        case "pending":
-            pending = "active text-white bg-dark";
-            break;
-        case "inprocess":
-            inprocess = "active text-white bg-dark";
-            break;
-        case "completed":
-            completed = "active text-white bg-dark";
-            break;
-        case "approved":
-            approved = "active text-white bg-dark";
-            break;
-        default:
-            all  = "active text-white bg-dark";
-            break;
-        
-    }
+        Title = "Order Management",
+        Subtitle = "Track customer fulfillment, corporate invoices, carrier shipments, and payment captures.",
+        IconClass = "bi bi-receipt"
+    };
 }
 
-<div class="container mt-5">
-    <div class="card shadow rounded-4 border-0">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top-4">
-            <h3 class="mb-0">
-                <i class="bi bi-box-seam me-2"></i> Order List
-            </h3>
-        </div>
-        <div class="card-body bg-light rounded-bottom-4">
-            <div class="d-flex justify-content-center pb-4">
-                <span></span>
-                <ul class="list-group list-group-horizontal-sm d-flex justify-content-center">
-                    <a class="text-decoration-none" asp-controller="Order" asp-action="Index" asp-route-status="inprocess">
-                    <li class="list-group-item fw-bold @inprocess"><i class="bi bi-arrow-repeat me-1"></i> In Process</li>
-                    </a>
-                    <a class="text-decoration-none" asp-controller="Order" asp-action="Index" asp-route-status="pending">
-                    <li class="list-group-item fw-bold @pending"><i class="bi bi-hourglass-split me-1"></i> Pending</li>
-                    </a>
-                    <a class="text-decoration-none" asp-controller="Order" asp-action="Index" asp-route-status="completed">
-                    <li class="list-group-item fw-bold @completed"><i class="bi bi-check-circle me-1"></i> Completed</li>
-                    </a>
-                    <a class="text-decoration-none" asp-controller="Order" asp-action="Index" asp-route-status="approved">
-                    <li class="list-group-item fw-bold @approved"><i class="bi bi-check2-square me-1"></i> Approved</li>
-                    </a>
-                    <a class="text-decoration-none" asp-controller="Order" asp-action="Index" asp-route-status="all">
-                    <li class="list-group-item fw-bold @all"><i class="bi bi-list-ul me-1"></i> All</li>
-                    </a>
-                </ul>
+@section Breadcrumbs {
+    <a asp-area="Admin" asp-controller="Order" asp-action="Index">Operations</a>
+    <span class="separator">/</span>
+    <span class="current">Orders</span>
+}
 
+<div class="order-management-container py-2">
+    <partial name="_PageHeader" model="@pageHeader" />
+
+    <div class="qc-card overflow-hidden">
+        <!-- Segmented Status Tabs Bar -->
+        <div class="p-3 bg-surface-hover border-bottom border-subtle d-flex flex-wrap gap-2 align-items-center justify-content-between">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="small text-muted fw-semibold me-1">
+                    <i class="bi bi-funnel me-1"></i> Filter Status:
+                </span>
+                <a asp-action="Index" asp-route-status="all"
+                   class="btn btn-sm @(status == "all" ? "btn-primary qc-btn-primary" : "btn-outline-secondary qc-btn-secondary") rounded-pill px-3">
+                    <i class="bi bi-list-ul me-1"></i> All Orders
+                </a>
+                <a asp-action="Index" asp-route-status="inprocess"
+                   class="btn btn-sm @(status == "inprocess" ? "btn-primary qc-btn-primary" : "btn-outline-secondary qc-btn-secondary") rounded-pill px-3">
+                    <i class="bi bi-arrow-repeat me-1"></i> In Process
+                </a>
+                <a asp-action="Index" asp-route-status="pending"
+                   class="btn btn-sm @(status == "pending" ? "btn-primary qc-btn-primary" : "btn-outline-secondary qc-btn-secondary") rounded-pill px-3">
+                    <i class="bi bi-hourglass-split me-1"></i> Pending
+                </a>
+                <a asp-action="Index" asp-route-status="approved"
+                   class="btn btn-sm @(status == "approved" ? "btn-primary qc-btn-primary" : "btn-outline-secondary qc-btn-secondary") rounded-pill px-3">
+                    <i class="bi bi-check2-circle me-1"></i> Approved
+                </a>
+                <a asp-action="Index" asp-route-status="completed"
+                   class="btn btn-sm @(status == "completed" ? "btn-primary qc-btn-primary" : "btn-outline-secondary qc-btn-secondary") rounded-pill px-3">
+                    <i class="bi bi-truck me-1"></i> Shipped / Completed
+                </a>
             </div>
 
+            <span class="small text-muted font-mono d-none d-md-inline">
+                Real-time AJAX stream
+            </span>
+        </div>
+
+        <div class="p-3">
             <div class="table-responsive">
-                <table id="tblData" class="table table-bordered table-hover table-striped align-middle text-center mb-0 table-sm">
-                    <thead class="table-dark">
+                <table id="tblData" class="qc-table w-100">
+                    <thead>
                         <tr>
-                            <th><i class="bi bi-hash text-white me-1"></i> ID</th>
-                            <th><i class="bi bi-person text-white me-1"></i> Name</th>
-                            <th><i class="bi bi-phone text-white me-1"></i> Phone</th>
-                            <th><i class="bi bi-envelope text-white me-1"></i> Email</th>
-                            <th><i class="bi bi-bar-chart text-white me-1"></i> Status</th>
-                            <th><i class="bi bi-cash-coin text-white me-1"></i> Total</th>
-                            <th><i class="bi bi-tools text-white me-1"></i> Actions</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Total Due</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- DataTable will fill this -->
+                        <!-- Asynchronously loaded by order.js -->
                     </tbody>
                 </table>
             </div>
@@ -84,5 +80,5 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/order.js"></script>
+    <script src="~/js/order.js" asp-append-version="true"></script>
 }

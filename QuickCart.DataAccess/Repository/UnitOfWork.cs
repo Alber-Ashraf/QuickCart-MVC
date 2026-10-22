@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using QuickCart.Data;
@@ -38,9 +36,15 @@ namespace QuickCart.DataAccess.Repository
             Roles = new Repository<IdentityRole>(_db);
             UserRoles = new Repository<IdentityUserRole<string>>(_db);
         }
+
         public void Save()
         {
             _db.SaveChanges();
+        }
+
+        public async Task<int> SaveAsync(CancellationToken cancellationToken = default)
+        {
+            return await _db.SaveChangesAsync(cancellationToken);
         }
     }
 }

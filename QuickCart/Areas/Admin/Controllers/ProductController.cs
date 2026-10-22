@@ -1,5 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using QuickCart.DataAccess.Repository.IRepository;
@@ -24,142 +30,149 @@ namespace QuickCart.Areas.Admin.Controllers
             _blobService = blobService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            // Fetch the list of Products from the database
-            List<Product> objProductList = _unitOfWork.Product.GetAll(includedProperties:"Category").ToList();
-            // Pass the list to the View
-            return View(objProductList);
+            var productList = await _unitOfWork.Product.GetAllAsync(includedProperties: "Category");
+            return View(productList);
         }
-        public IActionResult Upsert(int? id)
+
+        public async Task<IActionResult> Upsert(int? id)
         {
-            // Fetch Category Name and Id            
+            var categories = await _unitOfWork.Category.GetAllAsync();
             ProductVM productVM = new()
             {
                 Product = new Product(),
-                CategoryList = _unitOfWork.Category.GetAll().Select(i => new SelectListItem
+                CategoryList = categories.Select(i => new SelectListItem
                 {
                     Text = i.Name,
                     Value = i.Id.ToString()
                 })
             };
+
             if (id == null || id == 0)
             {
-                // Return the view for creating a new Product
                 return View(productVM);
             }
-            else
+
+            var product = await _unitOfWork.Product.GetAsync(u => u.Id == id, includedProperties: "ProductImages");
+            if (product == null)
             {
-                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id, includedProperties: "ProductImages");
-                return View(productVM);
+                return NotFound();
             }
+
+            productVM.Product = product;
+            return View(productVM);
         }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upsert(ProductVM productVM, List<IFormFile>? files)
         {
             if (ModelState.IsValid)
             {
                 if (productVM.Product.Id == 0)
                 {
-                    _unitOfWork.Product.Add(productVM.Product);
-                    _unitOfWork.Save();
+                    await _unitOfWork.Product.AddAsync(productVM.Product);
                 }
                 else
                 {
                     _unitOfWork.Product.Update(productVM.Product);
-                    _unitOfWork.Save();
                 }
+                await _unitOfWork.SaveAsync();
 
                 if (files != null && files.Count > 0)
                 {
-                    foreach (IFormFile file in files)
+                    foreach (var file in files)
                     {
-                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        var imageUrl = await _blobService.UploadFileAsync(file, fileName);
 
-                        string imageUrl = await _blobService.UploadFileAsync(file, fileName);
-
-                        ProductImage image = new ProductImage
+                        ProductImage image = new()
                         {
                             ImageUrl = imageUrl,
                             ProductId = productVM.Product.Id
                         };
 
-                        _unitOfWork.ProductImage.Add(image);
+                        await _unitOfWork.ProductImage.AddAsync(image);
                     }
-
-                    _unitOfWork.Save();
+                    await _unitOfWork.SaveAsync();
                 }
 
-                TempData["success"] = "Product created/updated successfully";
-                return RedirectToAction("Index");
+                TempData["success"] = "Product saved successfully!";
+                return RedirectToAction(nameof(Index));
             }
+
+            var categories = await _unitOfWork.Category.GetAllAsync();
+            productVM.CategoryList = categories.Select(i => new SelectListItem
+            {
+                Text = i.Name,
+                Value = i.Id.ToString()
+            });
 
             return View(productVM);
         }
 
-        public async Task<IActionResult> DeleteImageAsync(int? imageId)
+        public async Task<IActionResult> DeleteImage(int? imageId)
         {
-            var imageToBeDeleted = _unitOfWork.ProductImage.Get(u => u.Id == imageId);
-            int productId = imageToBeDeleted.ProductId;
-
-            if (imageToBeDeleted != null)
+            if (imageId == null || imageId == 0)
             {
-                if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
-                {
-                    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, imageToBeDeleted.ImageUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(oldImagePath))
-                    {
-                        System.IO.File.Delete(oldImagePath);
-                    }
-
-                    string blobName = Path.GetFileName(imageToBeDeleted.ImageUrl);
-                    await _blobService.DeleteFileFromBlob(blobName);
-                }
-
-                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
-                _unitOfWork.Save();
-
-                TempData["success"] = "Image deleted successfully";
+                return NotFound();
             }
 
+            var imageToBeDeleted = await _unitOfWork.ProductImage.GetAsync(u => u.Id == imageId, tracked: true);
+            if (imageToBeDeleted == null)
+            {
+                return NotFound();
+            }
+
+            var productId = imageToBeDeleted.ProductId;
+
+            if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
+            {
+                var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, imageToBeDeleted.ImageUrl.TrimStart('/'));
+                if (System.IO.File.Exists(oldImagePath))
+                {
+                    System.IO.File.Delete(oldImagePath);
+                }
+
+                var blobName = Path.GetFileName(imageToBeDeleted.ImageUrl);
+                await _blobService.DeleteFileFromBlob(blobName);
+            }
+
+            _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+            await _unitOfWork.SaveAsync();
+
+            TempData["success"] = "Image deleted successfully!";
             return RedirectToAction(nameof(Upsert), new { id = productId });
         }
 
-        // This method is used to get the list of Products in JSON format for DataTables
-        #region ApI Calls
+        #region API Calls
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            // Fetch the list of Products from the database
-            List<Product> objProductList = _unitOfWork.Product.GetAll(includedProperties: "Category").ToList();
-            // Return the list as JSON
-            return Json(new { data = objProductList });
+            var productList = await _unitOfWork.Product.GetAllAsync(includedProperties: "Category");
+            return Json(new { data = productList });
         }
 
-        // This method is used to get the details of a specific Product for editing
         [HttpDelete]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            var productToBeDeleted = _unitOfWork.Product.Get(u => u.Id == id);
-            if (productToBeDeleted == null)
+            if (id == null || id == 0)
             {
-                return Json(new { sucess = false, massege = "Erorr While Deleting" });
+                return Json(new { success = false, message = "Invalid product identifier." });
             }
 
-            //var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, productToBeDeleted.ImageURL.TrimStart('\\'));
-            //if (System.IO.File.Exists(oldImagePath))
-            //{
-            //    System.IO.File.Delete(oldImagePath);
-            //}
+            var productToBeDeleted = await _unitOfWork.Product.GetAsync(u => u.Id == id, tracked: true);
+            if (productToBeDeleted == null)
+            {
+                return Json(new { success = false, message = "Product not found." });
+            }
 
-            // Remove the Product from the database
             _unitOfWork.Product.Remove(productToBeDeleted);
-            _unitOfWork.Save();
+            await _unitOfWork.SaveAsync();
 
-            return Json(new { sucess = true, massege = "Delete Sucsess" });
+            return Json(new { success = true, message = "Product deleted successfully." });
         }
         #endregion
-
     }
 }
-

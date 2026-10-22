@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Flyleaf</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+
+    <!-- Design Tokens & System CSS -->
+    <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/QuickCart.styles.css" asp-append-version="true" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32x32.png" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png" asp-append-version="true" />
+    <link rel="shortcut icon" href="~/favicon.ico" asp-append-version="true" />
+
+    <style>
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            background-color: var(--bg-canvas);
+        }
+        .auth-brand-side {
+            flex: 1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: var(--space-12) var(--space-8);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-brand-side::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .auth-form-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: var(--space-8) var(--space-6);
+            background-color: var(--bg-canvas);
+            overflow-y: auto;
+        }
+        .auth-form-card {
+            width: 100%;
+            max-width: 460px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-8);
+            box-shadow: var(--shadow-md);
+        }
+        .auth-topbar {
+            width: 100%;
+            max-width: 460px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+        @@media (max-width: 991.98px) {
+            .auth-brand-side {
+                display: none;
+            }
+            .auth-form-side {
+                padding: var(--space-4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- WCAG 2.2 AA Skip Navigation Link -->
+    <a href="#authMain" class="skip-to-content visually-hidden-focusable">Skip to authentication form</a>
+
+    <div class="auth-wrapper">
+        <!-- Brand Storytelling Showcase (Desktop) -->
+        <div class="auth-brand-side">
+            <div class="d-flex align-items-center gap-2">
+                <img src="~/favicon.svg" alt="Flyleaf Logo" width="36" height="36" class="rounded-2 shadow-sm" />
+                <span class="fw-bold fs-4 tracking-tight">Flyleaf</span>
+                <span class="brand-badge">EDITION</span>
+            </div>
+
+            <div class="my-auto py-5">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill mb-3">
+                    <i class="bi bi-shield-lock-fill me-1"></i> Bank-Grade Security
+                </span>
+                <h1 class="display-6 fw-bold mb-3 text-white">
+                    Next-Generation Book Commerce & Publishing Platform.
+                </h1>
+                <p class="text-white-50 fs-6 mb-4" style="max-width: 480px;">
+                    Manage titles, publisher editions, wholesale bookstore orders, and reader fulfillment in real-time with automated Stripe workflows.
+                </p>
+
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-check2-circle text-success fs-5"></i>
+                        <span class="text-white">Strict OWASP Top 10 Security & Brute-Force Defense</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-check2-circle text-success fs-5"></i>
+                        <span class="text-white">Tiered Bulk Pricing & Net-30 Invoicing for Bookstores</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-check2-circle text-success fs-5"></i>
+                        <span class="text-white">Automated Carrier Tracking & Stripe Payment Intent</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="small text-white-50">
+                &copy; @DateTime.UtcNow.Year Flyleaf Inc. All rights reserved.
+            </div>
+        </div>
+
+        <!-- Auth Form Interactive Side -->
+        <div class="auth-form-side">
+            <div class="auth-topbar">
+                <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary qc-btn-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Store
+                </a>
+                <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle theme">
+                    <i class="bi bi-moon-stars theme-icon-dark"></i>
+                    <i class="bi bi-sun theme-icon-light"></i>
+                </button>
+            </div>
+
+            <div class="auth-form-card" id="authMain" tabindex="-1">
+                <partial name="_Notification" />
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -26,5 +26,41 @@ namespace QuickCart.Utility
         public const string PaymentStatusRejected = "Rejected";
 
         public const string SessionCart = "SessionShoppingCart";
+
+        /// <summary>
+        /// Sanitizes return URLs to prevent open redirects and self-referential redirect loops
+        /// back to login or external authentication callbacks.
+        /// </summary>
+        public static string CleanReturnUrl(string? returnUrl)
+        {
+            if (string.IsNullOrWhiteSpace(returnUrl))
+            {
+                return "~/";
+            }
+
+            // Reject open redirects or protocol-relative schemes
+            if (returnUrl.StartsWith("//") || returnUrl.StartsWith("/\\") ||
+                returnUrl.Contains("://", StringComparison.Ordinal))
+            {
+                return "~/";
+            }
+
+            // Must be a relative local path
+            if (!returnUrl.StartsWith('/') && !returnUrl.StartsWith("~/"))
+            {
+                return "~/";
+            }
+
+            // Prevent self-referential redirect loops back to login/external login pages
+            if (returnUrl.Contains("/Identity/Account/Login", StringComparison.OrdinalIgnoreCase) ||
+                returnUrl.Contains("/Identity/Account/ExternalLogin", StringComparison.OrdinalIgnoreCase) ||
+                returnUrl.Contains("/Identity/Account/Register", StringComparison.OrdinalIgnoreCase) ||
+                returnUrl.Contains("handler=Callback", StringComparison.OrdinalIgnoreCase))
+            {
+                return "~/";
+            }
+
+            return returnUrl;
+        }
     }
 }

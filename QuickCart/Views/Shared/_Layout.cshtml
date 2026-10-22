@@ -2,15 +2,16 @@
 @inject IHttpContextAccessor HttpContextAccessor
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Flyleaf</title>
 
-    <title>@ViewData["Title"] - QuickCart</title>
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts (Plus Jakarta Sans + JetBrains Mono) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -24,134 +25,180 @@
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Design Tokens & Enterprise SaaS CSS -->
+    <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuickCart.styles.css" asp-append-version="true" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="~/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32x32.png" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png" asp-append-version="true" />
+    <link rel="shortcut icon" href="~/favicon.ico" asp-append-version="true" />
+
+    <!-- Prevent Flash of Unstyled Content (FOUC) Theme Script -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('qc-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        })();
+    </script>
 </head>
 
-<body class="d-flex flex-column min-vh-80 bg-light">
-    <!-- Preloader -->
-    <div id="preloader">
-        <div class="dot-loader">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        <p class="fw-bold mt-4">Loading...</p>
-    </div>
+<body>
+    <!-- WCAG 2.2 AA Skip Navigation Link -->
+    <a href="#mainContent" class="skip-to-content visually-hidden-focusable">Skip to main content</a>
 
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-dark shadow-sm border-bottom">
-            <div class="container-fluid">
-                <a class="navbar-brand text-info" asp-area="" asp-controller="Home" asp-action="Index">QuickCart</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+    <div class="app-shell" id="appShell">
+        <!-- Collapsible Enterprise Sidebar -->
+        <aside class="app-sidebar" id="appSidebar" aria-label="Main Navigation">
+            <div class="sidebar-brand">
+                <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="brand-link" title="Flyleaf Home">
+                    <img src="~/favicon.svg" alt="Flyleaf Logo" width="32" height="32" class="brand-logo-img" />
+                    <span class="brand-text">Flyleaf</span>
+                    <span class="brand-badge">EDITION</span>
+                </a>
+                <button type="button" class="sidebar-collapse-toggle d-none d-lg-flex" id="sidebarCollapseBtn" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar" aria-controls="appSidebar" aria-expanded="true">
+                    <i class="bi bi-chevron-bar-left"></i>
                 </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Customer) || User.IsInRole(SD.Role_Company) || User.IsInRole(SD.Role_Employee))
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Storefront Section -->
+                <div class="nav-section-title">Storefront</div>
+                <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="nav-item" title="Book Catalog">
+                    <i class="bi bi-book"></i>
+                    <span class="nav-label">Book Catalog</span>
+                </a>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-item" title="Shopping Cart">
+                        @await Component.InvokeAsync("ShoppingCart")
+                    </a>
+                    <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="nav-item" title="My Orders">
+                        <i class="bi bi-receipt"></i>
+                        <span class="nav-label">My Orders</span>
+                    </a>
+                }
+
+                <!-- Operations Section (Admin & Employee) -->
+                @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                {
+                    <div class="nav-section-title">Operations</div>
+                    <a asp-area="Admin" asp-controller="Order" asp-action="Index" class="nav-item" title="Orders Pipeline">
+                        <i class="bi bi-kanban"></i>
+                        <span class="nav-label">Orders Pipeline</span>
+                    </a>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="nav-item" title="Inventory & Products">
+                        <i class="bi bi-box-seam"></i>
+                        <span class="nav-label">Inventory & Products</span>
+                    </a>
+                    <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="nav-item" title="Categories">
+                        <i class="bi bi-folder2-open"></i>
+                        <span class="nav-label">Categories</span>
+                    </a>
+                    <a asp-area="Admin" asp-controller="Company" asp-action="Index" class="nav-item" title="B2B Accounts">
+                        <i class="bi bi-building"></i>
+                        <span class="nav-label">B2B Accounts</span>
+                    </a>
+                }
+
+                <!-- Governance Section (Admin Only) -->
+                @if (User.IsInRole(SD.Role_Admin))
+                {
+                    <div class="nav-section-title">Governance</div>
+                    <a asp-area="Admin" asp-controller="User" asp-action="Index" class="nav-item" title="Users & Roles">
+                        <i class="bi bi-people-fill"></i>
+                        <span class="nav-label">Users & Roles</span>
+                    </a>
+                    <a href="/health" target="_blank" class="nav-item" title="System Health">
+                        <i class="bi bi-activity"></i>
+                        <span class="nav-label">System Health</span>
+                        <span class="nav-indicator-dot online" title="Operational"></span>
+                    </a>
+                }
+            </nav>
+
+            <!-- Collapsible Sidebar Rail Footer (Visible in both Expanded & Collapsed Rail) -->
+            <div class="sidebar-footer d-none d-lg-flex">
+                <button type="button" class="sidebar-rail-toggle" id="sidebarRailToggleBtn" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar" aria-controls="appSidebar" aria-expanded="true">
+                    <i class="bi bi-chevron-bar-left rail-collapse-icon"></i>
+                    <span class="rail-toggle-label">Collapse</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Viewport Area -->
+        <div class="app-main">
+            <!-- Sticky Contextual Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button type="button" class="topbar-mobile-toggle d-lg-none btn btn-sm p-1 text-secondary" id="mobileMenuBtn" aria-label="Open mobile menu" aria-expanded="false" aria-controls="appSidebar">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                    <button type="button" class="sidebar-toggle-btn d-none d-lg-flex" id="topbarSidebarToggleBtn" title="Toggle Sidebar (Ctrl+B)" aria-label="Toggle Sidebar" aria-controls="appSidebar" aria-expanded="true">
+                        <i class="bi bi-layout-sidebar"></i>
+                    </button>
+                    <nav class="app-breadcrumbs" aria-label="Breadcrumb">
+                        <a asp-area="Customer" asp-controller="Home" asp-action="Index">Flyleaf</a>
+                        @if (IsSectionDefined("Breadcrumbs"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="Admin" asp-controller="Order" asp-action="Index">Order Management</a>
-                            </li>
+                            <span class="separator">/</span>
+                            @await RenderSectionAsync("Breadcrumbs", required: false)
                         }
-                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-light fw-semibold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-gear-fill me-1"></i> Content Management
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm bg-dark border-0 rounded-3 overflow-hidden">
-                                    <li>
-                                        <a class="dropdown-item text-light" asp-area="Admin" asp-controller="Category" asp-action="Index">
-                                            <i class="bi bi-folder2-open me-2 text-info"></i> Categories
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item text-light" asp-area="Admin" asp-controller="Product" asp-action="Index">
-                                            <i class="bi bi-box-seam me-2 text-warning"></i> Products
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item text-light" asp-area="Admin" asp-controller="Company" asp-action="Index">
-                                            <i class="bi bi-building me-2"></i> Companies
-                                        </a>
-                                    </li>
-                                    @if (User.IsInRole(SD.Role_Admin))
-                                    {
-                                        <li><hr class="dropdown-divider bg-secondary"></li>
-                                        <li>
-                                            <a class="dropdown-item text-light" asp-area="Identity" asp-page="/Account/Register">
-                                                <i class="bi bi-person-plus me-2 text-success"></i> Register User
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item text-light" asp-area="Admin" asp-controller="User" asp-action="Index">
-                                                <i class="bi bi-people-fill me-2 text-warning"></i> Users
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
-                            </li>
-                        }
-                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Customer) || User.IsInRole(SD.Role_Company) || User.IsInRole(SD.Role_Employee))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="Customer" asp-controller="Cart" asp-action="Index">
-                                    @await Component.InvokeAsync("ShoppingCart")
-                                </a>
-                            </li>
-                        }
-                    </ul>
+                    </nav>
+                </div>
+
+                <div class="topbar-right">
+                    <!-- Global Search Trigger (Ctrl+K) -->
+                    <button type="button" class="global-search-btn" id="globalSearchTrigger" title="Quick Search (Ctrl+K)">
+                        <i class="bi bi-search"></i>
+                        <span class="search-placeholder">Search...</span>
+                        <kbd class="search-kbd">⌘K</kbd>
+                    </button>
+
+                    <!-- Dark / Light Mode Switcher -->
+                    <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme" aria-label="Toggle light or dark theme">
+                        <i class="bi bi-moon-stars theme-icon-dark"></i>
+                        <i class="bi bi-sun theme-icon-light"></i>
+                    </button>
+
+                    <!-- User Profile Dropdown -->
                     <partial name="_LoginPartial" />
                 </div>
-            </div>
-        </nav>
-    </header>
+            </header>
 
-    <div class="container my-4 flex-grow-1">
-        <main role="main" class="pb-3">
-            <partial name="_Notification" />
-            @RenderBody()
-        </main>
+            <!-- Main Content Canvas -->
+            <main class="app-content" id="mainContent" tabindex="-1" role="main">
+                <partial name="_Notification" />
+                @RenderBody()
+            </main>
+
+            <!-- Minimalist Enterprise Footer -->
+            <footer class="px-4 py-3 border-top border-subtle d-flex justify-content-between align-items-center text-muted small mt-auto">
+                <div>
+                    &copy; @DateTime.UtcNow.Year Flyleaf Inc. Enterprise Publishing & Commerce.
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="d-inline-flex align-items-center gap-1 text-success">
+                        <span class="nav-indicator-dot online"></span> All Systems Operational
+                    </span>
+                    <a asp-area="Customer" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">
+                        Privacy Policy
+                    </a>
+                </div>
+            </footer>
+        </div>
     </div>
 
-    <footer class="footer mt-auto py-2 bg-dark text-light border-top shadow-sm">
-        <div class="container">
-            <div class="row text-center text-md-start">
-                <div class="col-12 container text-center">
-                    <em class="text-secondary fs-6 d-block d-md-inline">
-                        "At <span class="text-info">QuickCart</span>, every click brings you closer to your dreams."
-                    </em>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-
-    <!-- Scripts -->
+    <!-- Core Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
-    <script>
-        // Preloader hide
-        $(window).on("load", function () {
-            $('#preloader').fadeOut('slow');
-        });
-    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

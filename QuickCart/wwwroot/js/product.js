@@ -1,88 +1,94 @@
-﻿var dataTable;
+﻿let productTable;
 
-$(document).ready(function () {
-    loadDataTable();
+$(function () {
+    loadProductTable();
 });
-function loadDataTable() {
-    dataTable = $('#tblData').DataTable({
-        "ajax": {
+
+function loadProductTable() {
+    productTable = $('#tblData').DataTable({
+        ajax: {
             url: '/Admin/Product/GetAll',
             dataSrc: 'data'
         },
-        "columns": [
+        columns: [
             {
                 data: 'title',
-                width: "20%",
-                className: "text-nowrap"
+                width: '25%',
+                className: 'fw-semibold text-primary',
+                render: function (data) {
+                    return `<span class="text-truncate d-inline-block" style="max-width: 240px;" title="${data}">${data}</span>`;
+                }
             },
             {
                 data: 'author',
-                width: "20%",
-                className: "text-nowrap"
+                width: '18%',
+                className: 'text-secondary',
+                render: function (data) {
+                    return data || '<span class="text-muted">—</span>';
+                }
             },
             {
                 data: 'isbn',
-                width: "10%",
-                className: "text-nowrap"
+                width: '14%',
+                className: 'font-mono small',
+                render: function (data) {
+                    return data ? `<span class="qc-badge qc-badge-muted">${data}</span>` : '<span class="text-muted">—</span>';
+                }
             },
             {
                 data: 'price',
-                width: "10%",
-                className: "text-nowrap"
+                width: '12%',
+                className: 'font-mono fw-bold text-primary',
+                render: function (data) {
+                    return '$' + parseFloat(data).toFixed(2);
+                }
             },
             {
                 data: 'category.name',
-                width: "15%",
-                className: "text-nowrap"
+                width: '15%',
+                render: function (data) {
+                    return data
+                        ? `<span class="qc-badge qc-badge-accent"><i class="bi bi-tag-fill me-1"></i>${data}</span>`
+                        : '<span class="qc-badge qc-badge-muted">Uncategorized</span>';
+                }
             },
             {
                 data: 'id',
-                "render": function (data) {
+                width: '16%',
+                className: 'text-center',
+                orderable: false,
+                render: function (data) {
                     return `
-                    <div class="btn-group w-100 justify-content-center" role="group">
-                        <a href="/Admin/Product/Upsert?id=${data}"
-                           class="btn btn-dark mx-2"> <i class="bi bi-pencil-square"></i> Edit
+                    <div class="d-inline-flex gap-1" role="group">
+                        <a href="/Admin/Product/Upsert?id=${data}" class="btn btn-sm btn-outline-secondary qc-btn-secondary" title="Edit Product">
+                            <i class="bi bi-pencil me-1"></i> Edit
                         </a>
-                        <a onClick="Delete('/Admin/Product/Delete/${data}')"
-                           class="btn btn-danger mx-2"> <i class="bi bi-trash-fill"></i> Delete
-                        </a>
+                        <button type="button" onclick="deleteProduct('/Admin/Product/Delete/${data}')" class="btn btn-sm btn-outline-danger" title="Delete Product">
+                            <i class="bi bi-trash3"></i>
+                        </button>
                     </div>`;
-                },
-                "width": "25%",
-                className: "text-nowrap"
+                }
             }
         ],
         responsive: true,
         language: {
-            emptyTable: "No products available",
-            search: "_INPUT_",
-            searchPlaceholder: "Search products..."
+            emptyTable: 'No products available in the catalog',
+            search: '',
+            searchPlaceholder: 'Search products...',
+            paginate: {
+                previous: '<i class="bi bi-chevron-left"></i>',
+                next: '<i class="bi bi-chevron-right"></i>'
+            }
         }
     });
 }
 
-function Delete(url) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: url,
-                type: 'DELETE',
-                success: function (data) {
-                    dataTable.ajax.reload();
-                    toastr.success(data.message);
-                },
-                error: function () {
-                    toastr.error("Something went wrong while deleting.");
-                }
-            });
-        }
+function deleteProduct(url) {
+    window.qcDeleteRecord({
+        url: url,
+        table: productTable,
+        title: 'Delete this product?',
+        text: 'This action permanently removes the product and associated image assets.',
+        successMsg: 'Product deleted successfully.'
     });
 }

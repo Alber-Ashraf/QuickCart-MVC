@@ -1,6 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
+#nullable enable
 
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -94,30 +94,61 @@ namespace QuickCart.Areas.Identity.Pages.Account
             public string? PostalCode { get; set; }
             public string? PhoneNumber { get; set; }
         }
-        
-        public IActionResult OnGet() => RedirectToPage("./Login");
 
-        public IActionResult OnPost(string provider, string returnUrl = null)
+        public IActionResult OnGet(string? returnUrl = null) => RedirectToPage("./Login", new { ReturnUrl = SD.CleanReturnUrl(returnUrl) });
+
+        public async Task<IActionResult> OnPost(string? provider, string? returnUrl = null)
         {
+            returnUrl = SD.CleanReturnUrl(returnUrl);
+
+            // Defensive extraction: check Request.Form and Request.Query if model binding missed provider
+            if (string.IsNullOrWhiteSpace(provider))
+            {
+                if (Request.HasFormContentType && Request.Form.TryGetValue("provider", out var formProvider) && !string.IsNullOrWhiteSpace(formProvider))
+                {
+                    provider = formProvider.ToString();
+                }
+                else if (Request.Query.TryGetValue("provider", out var queryProvider) && !string.IsNullOrWhiteSpace(queryProvider))
+                {
+                    provider = queryProvider.ToString();
+                }
+            }
+
+            // Fallback for single-provider environments (e.g. Google)
+            if (string.IsNullOrWhiteSpace(provider))
+            {
+                var schemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                if (schemes.Count == 1)
+                {
+                    provider = schemes[0].Name;
+                }
+                else
+                {
+                    _logger.LogWarning("External login initiated without a provider specified. Form keys: {Keys}",
+                        Request.HasFormContentType ? string.Join(", ", Request.Form.Keys) : "none");
+                    return RedirectToPage("./Login", new { ReturnUrl = returnUrl, ExternalLoginError = "Authentication provider was not specified. Please try again." });
+                }
+            }
+
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
         }
 
-        public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> OnGetCallbackAsync(string? returnUrl = null, string? remoteError = null)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
+            returnUrl = SD.CleanReturnUrl(returnUrl);
             if (remoteError != null)
             {
                 ErrorMessage = $"Error from external provider: {remoteError}";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl, ExternalLoginError = ErrorMessage });
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information.";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                ErrorMessage = "Error loading external login information. Please try again or sign in with your email.";
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl, ExternalLoginError = ErrorMessage });
             }
 
             // Sign in the user with this external login provider if the user already has a login.
@@ -133,34 +164,60 @@ namespace QuickCart.Areas.Identity.Pages.Account
             }
             else
             {
-                // If the user does not have an account, then ask the user to create an account.
+                // If a user account already exists with the verified external email, link it directly
+                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                if (!string.IsNullOrEmpty(email))
+                {
+                    var existingUser = await _userManager.FindByEmailAsync(email);
+                    if (existingUser != null)
+                    {
+                        var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
+                        if (addLoginResult.Succeeded || addLoginResult.Errors.Any(e => e.Code == "LoginAlreadyAssociated"))
+                        {
+                            _logger.LogInformation("Linked {LoginProvider} login to existing user {Email}.", info.LoginProvider, email);
+                            await _signInManager.SignInAsync(existingUser, isPersistent: false, info.LoginProvider);
+                            return LocalRedirect(returnUrl);
+                        }
+                    }
+                }
+
+                // If the user does not have an account, ask the user to complete registration details.
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
-                if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+                Input = new InputModel
                 {
-                    Input = new InputModel
-                    {
-                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
-                        Name = info.Principal.FindFirstValue(ClaimTypes.Name)
-                    };
-                }
+                    Email = email ?? string.Empty,
+                    Name = info.Principal.FindFirstValue(ClaimTypes.Name) ?? (email?.Split('@')[0] ?? string.Empty)
+                };
                 return Page();
             }
         }
 
-        public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostConfirmationAsync(string? returnUrl = null)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
+            returnUrl = SD.CleanReturnUrl(returnUrl);
             // Get the information about the user from the external login provider
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
                 ErrorMessage = "Error loading external login information during confirmation.";
-                return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                return RedirectToPage("./Login", new { ReturnUrl = returnUrl, ExternalLoginError = ErrorMessage });
             }
 
             if (ModelState.IsValid)
             {
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+                if (existingUser != null)
+                {
+                    var addLoginResult = await _userManager.AddLoginAsync(existingUser, info);
+                    if (addLoginResult.Succeeded || addLoginResult.Errors.Any(e => e.Code == "LoginAlreadyAssociated"))
+                    {
+                        _logger.LogInformation("Linked {LoginProvider} login to existing user {Email} upon confirmation.", info.LoginProvider, Input.Email);
+                        await _signInManager.SignInAsync(existingUser, isPersistent: false, info.LoginProvider);
+                        return LocalRedirect(returnUrl);
+                    }
+                }
+
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);

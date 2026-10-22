@@ -1,169 +1,187 @@
 ﻿@page
 @model RegisterModel
 @{
-    ViewData["Title"] = "Register";
+    var isAdmin = User.IsInRole(SD.Role_Admin);
+    ViewData["Title"] = isAdmin ? "Register - Admin Portal" : "Create Account";
+    Layout = "/Views/Shared/_AuthLayout.cshtml";
 }
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="card shadow-lg border-0 rounded-4 p-4" style="width: 100%; max-width: 700px;">
-        <div class="card-body">
-            @if(User.IsInRole(SD.Role_Admin))
-            {
-                <h2 class="text-center mb-3 fw-bold text-dark">Register - Admin Portal</h2>
-            }
-            else{
-            <h2 class="text-center mb-3 fw-bold text-dark">Create Your Account</h2>
-            <p class="text-center text-muted mb-4">Join our community and start your journey today!</p>
-            }
-            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+<div class="auth-card-content">
+    <div class="text-center mb-4">
+        <div class="brand-logo-icon mx-auto mb-2" style="width: 44px; height: 44px; font-size: 20px;">
+            <i class="bi bi-person-plus"></i>
+        </div>
+        <h2 class="fs-4 fw-bold text-primary mb-1">
+            @(isAdmin ? "Register User (Admin)" : "Create your account")
+        </h2>
+        <p class="text-muted small mb-0">
+            @(isAdmin ? "Provision a new verified identity or corporate user." : "Join Flyleaf to start ordering and unlock wholesale book discounts.")
+        </p>
+    </div>
 
-                <div class="row g-3">
-                    <!-- Email -->
-                    <div class="col-md-12">
-                        <div class="form-floating">
-                            <input asp-for="Input.Email" class="form-control" placeholder="Email" />
-                            <label asp-for="Input.Email">Email</label>
-                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                        </div>
-                    </div>
+    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
 
-                    <!-- Full Name -->
-                    <div class="col-md-12">
-                        <div class="form-floating">
-                            <input asp-for="Input.Name" class="form-control" placeholder="Full Name" />
-                            <label asp-for="Input.Name">Full Name</label>
-                            <span asp-validation-for="Input.Name" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <!-- Phone + Address -->
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Phone Number" />
-                            <label asp-for="Input.PhoneNumber">Phone Number</label>
-                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <input asp-for="Input.Address" class="form-control" placeholder="Address" />
-                            <label asp-for="Input.Address">Address</label>
-                            <span asp-validation-for="Input.Address" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <!-- PostalCode + City + State -->
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input asp-for="Input.PostalCode" class="form-control" placeholder="Postal Code" />
-                            <label asp-for="Input.PostalCode">Postal Code</label>
-                            <span asp-validation-for="Input.PostalCode" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input asp-for="Input.City" class="form-control" placeholder="City" />
-                            <label asp-for="Input.City">City</label>
-                            <span asp-validation-for="Input.City" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input asp-for="Input.State" class="form-control" placeholder="State" />
-                            <label asp-for="Input.State">State</label>
-                            <span asp-validation-for="Input.State" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <!-- Password + Confirm -->
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <input asp-for="Input.Password" class="form-control" placeholder="Password" type="password" />
-                            <label asp-for="Input.Password">Password</label>
-                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Confirm Password" type="password" />
-                            <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <!-- Role -->
-                    @if (User.IsInRole(SD.Role_Admin))
-                    {
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <select asp-for="Input.Role" asp-items="@Model.Input.Role_List" class="form-select">
-                                    <option disabled selected>Select a role</option>
-                                </select>
-                                <label asp-for="Input.Role">Role</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <select asp-for="Input.CompanyId" style="display:none" asp-items="@Model.Input.Company_List" class="form-select">
-                                    <option disabled selected>Select Company</option>
-                                </select>
-                            </div>
-                        </div>
-                    }
-
+        <div class="row g-3">
+            <!-- Full Name -->
+            <div class="col-12">
+                <label asp-for="Input.Name" class="form-label small fw-semibold text-secondary">Full Name <span class="text-danger">*</span></label>
+                <div class="input-icon-group">
+                    <i class="bi bi-person input-prefix-icon"></i>
+                    <input asp-for="Input.Name" class="form-control qc-input" placeholder="e.g. Jane Doe" autofocus />
                 </div>
+                <span asp-validation-for="Input.Name" class="text-danger small"></span>
+            </div>
 
-                <!-- Submit -->
-                <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-dark btn-lg">
-                        <i class="bi bi-person-plus me-2"></i>Register
-                    </button>
+            <!-- Email -->
+            <div class="col-12">
+                <label asp-for="Input.Email" class="form-label small fw-semibold text-secondary">Email Address <span class="text-danger">*</span></label>
+                <div class="input-icon-group">
+                    <i class="bi bi-envelope input-prefix-icon"></i>
+                    <input asp-for="Input.Email" class="form-control qc-input" autocomplete="username" placeholder="name@example.com" />
+                </div>
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+            </div>
+
+            <!-- Phone + Address -->
+            <div class="col-md-6">
+                <label asp-for="Input.PhoneNumber" class="form-label small fw-semibold text-secondary">Phone Number</label>
+                <div class="input-icon-group">
+                    <i class="bi bi-telephone input-prefix-icon"></i>
+                    <input asp-for="Input.PhoneNumber" class="form-control qc-input font-mono" placeholder="+1 (555) 000-0000" />
+                </div>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.Address" class="form-label small fw-semibold text-secondary">Street Address</label>
+                <div class="input-icon-group">
+                    <i class="bi bi-house-door input-prefix-icon"></i>
+                    <input asp-for="Input.Address" class="form-control qc-input" placeholder="123 Market St" />
+                </div>
+                <span asp-validation-for="Input.Address" class="text-danger small"></span>
+            </div>
+
+            <!-- City, State, Postal -->
+            <div class="col-md-5">
+                <label asp-for="Input.City" class="form-label small fw-semibold text-secondary">City</label>
+                <input asp-for="Input.City" class="form-control qc-input" placeholder="City" />
+                <span asp-validation-for="Input.City" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Input.State" class="form-label small fw-semibold text-secondary">State</label>
+                <input asp-for="Input.State" class="form-control qc-input" placeholder="State" />
+                <span asp-validation-for="Input.State" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="Input.PostalCode" class="form-label small fw-semibold text-secondary">ZIP</label>
+                <input asp-for="Input.PostalCode" class="form-control qc-input font-mono" placeholder="ZIP" />
+                <span asp-validation-for="Input.PostalCode" class="text-danger small"></span>
+            </div>
+
+            <!-- Password & Confirm -->
+            <div class="col-md-6">
+                <label asp-for="Input.Password" class="form-label small fw-semibold text-secondary">Password <span class="text-danger">*</span></label>
+                <div class="input-icon-group">
+                    <i class="bi bi-lock input-prefix-icon"></i>
+                    <input asp-for="Input.Password" type="password" class="form-control qc-input" autocomplete="new-password" placeholder="••••••••" />
+                </div>
+                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.ConfirmPassword" class="form-label small fw-semibold text-secondary">Confirm Password <span class="text-danger">*</span></label>
+                <div class="input-icon-group">
+                    <i class="bi bi-shield-check input-prefix-icon"></i>
+                    <input asp-for="Input.ConfirmPassword" type="password" class="form-control qc-input" autocomplete="new-password" placeholder="••••••••" />
+                </div>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <!-- Role & Company Selection (Admin Only) -->
+            @if (isAdmin)
+            {
+                <div class="col-md-6">
+                    <label asp-for="Input.Role" class="form-label small fw-semibold text-secondary">Role</label>
+                    <select asp-for="Input.Role" asp-items="@Model.Input.Role_List" class="form-select qc-input" id="registerRoleSelect">
+                        <option disabled selected>Select a role</option>
+                    </select>
+                </div>
+                <div class="col-md-6" id="registerCompanyContainer" style="display:none;">
+                    <label asp-for="Input.CompanyId" class="form-label small fw-semibold text-secondary">Company</label>
+                    <select asp-for="Input.CompanyId" asp-items="@Model.Input.Company_List" class="form-select qc-input">
+                        <option disabled selected>Select Company</option>
+                    </select>
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary qc-btn-primary w-100 py-2 justify-content-center mt-4" data-loading-text="Creating Account...">
+            <i class="bi bi-check2-circle me-2"></i> @(isAdmin ? "Create Directory Account" : "Complete Registration")
+        </button>
+
+        <div class="text-center mt-4 pt-3 border-top border-subtle small text-muted">
+            Already registered?
+            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-semibold text-decoration-none ms-1">
+                Sign in here
+            </a>
+        </div>
+    </form>
+
+    <!-- External Providers -->
+    @if (!isAdmin && (Model.ExternalLogins?.Count ?? 0) > 0)
+    {
+        <div class="mt-4 pt-3 border-top border-subtle text-center">
+            <span class="small text-muted d-block mb-3">Or sign up with:</span>
+            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var provider in Model.ExternalLogins!)
+                    {
+                        <button type="submit" class="btn btn-outline-secondary qc-btn-secondary w-100 justify-content-center no-spinner"
+                                name="provider" value="@provider.Name"
+                                asp-page="./ExternalLogin" asp-route-provider="@provider.Name" asp-route-returnUrl="@Model.ReturnUrl">
+                            @if (provider.Name.Equals("Google", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <svg class="me-2" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                                </svg>
+                                <span>Continue with Google</span>
+                            }
+                            else if (provider.Name.Equals("Facebook", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <i class="bi bi-facebook me-2 text-primary fs-6" aria-hidden="true"></i>
+                                <span>Continue with Facebook</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-shield-check me-2" aria-hidden="true"></i>
+                                <span>Continue with @provider.DisplayName</span>
+                            }
+                        </button>
+                    }
                 </div>
             </form>
-
-            <!-- External Login -->
-            @if (!User.IsInRole(SD.Role_Admin))
-            {
-                @if ((Model.ExternalLogins?.Count ?? 0) > 0)
-                {
-                    <hr class="my-4" />
-                    <div class="text-center">
-                        <p class="text-muted mb-2">Or sign up using</p>
-                        <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                            @foreach (var provider in Model.ExternalLogins!)
-                            {
-                                <button type="submit" class="btn btn-outline-secondary w-100 mb-2" name="provider" value="@provider.Name">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i>@provider.DisplayName
-                                </button>
-                            }
-                        </form>
-                    </div>
-                }
-            }
-            
         </div>
-    </div>
+    }
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-		$(document).ready(function () {
-			// Show CompanyId select if Role is "Company"
-			$('#Input_Role').change(function () {
-				if ($(this).val() === 'Company') {
-					$('#Input_CompanyId').show();
-				} else {
-					$('#Input_CompanyId').hide();
-				}
-			});
-			// Trigger change on page load to set initial visibility
-			$('#Input_Role').trigger('change');
-		});
+        $(document).ready(function () {
+            $('#registerRoleSelect').on('change', function () {
+                if ($(this).val() === 'Company') {
+                    $('#registerCompanyContainer').slideDown(150);
+                } else {
+                    $('#registerCompanyContainer').slideUp(150);
+                }
+            });
+        });
     </script>
 }

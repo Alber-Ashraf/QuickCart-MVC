@@ -1,3 +1,10 @@
 ﻿@model int
 
-<i class="bi bi-cart"></i> &nbsp; @(Model)
+<span class="d-inline-flex align-items-center gap-2">
+    <i class="bi bi-cart4"></i>
+    <span class="nav-label">Shopping Cart</span>
+    @if (Model > 0)
+    {
+        <span class="nav-badge">@Model</span>
+    }
+</span>

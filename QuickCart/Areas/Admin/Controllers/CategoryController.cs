@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QuickCart.Data;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
 using QuickCart.Utility;
@@ -18,96 +18,106 @@ namespace QuickCart.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            // Fetch the list of categories from the database
-            List<Category> objCategoryList = _unitOfWork.Category.GetAll().ToList();
-
-            // Pass the list to the View
-            return View(objCategoryList);
+            var categoryList = await _unitOfWork.Category.GetAllAsync();
+            return View(categoryList);
         }
+
         public IActionResult Create()
         {
-            // Return the view for creating a new category
             return View();
         }
+
         [HttpPost]
-        public IActionResult Create(Category category)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Category category)
         {
+            if (category.Name == category.DisplayOrder.ToString())
+            {
+                ModelState.AddModelError("Name", "The Display Order cannot exactly match the Category Name.");
+            }
+
             if (ModelState.IsValid)
             {
-                // Add the new category to the database
-                _unitOfWork.Category.Add(category);
-                _unitOfWork.Save();
+                await _unitOfWork.Category.AddAsync(category);
+                await _unitOfWork.SaveAsync();
 
                 TempData["success"] = "Category created successfully!";
-                // Redirect to the Index action after successful creation
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
-            // If model state is not valid, return the view with the current model
+
             return View(category);
         }
 
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
-            // Fetch the category from the database
-            var categoryFromDb = _unitOfWork.Category.Get(u=> u.Id==id);
-            if (categoryFromDb == null)
+
+            var category = await _unitOfWork.Category.GetAsync(u => u.Id == id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+
+            return View(category);
         }
+
         [HttpPost]
-        public IActionResult Edit(Category category)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Category category)
         {
+            if (category.Name == category.DisplayOrder.ToString())
+            {
+                ModelState.AddModelError("Name", "The Display Order cannot exactly match the Category Name.");
+            }
+
             if (ModelState.IsValid)
             {
-                // Update the category in the database
                 _unitOfWork.Category.Update(category);
-                _unitOfWork.Save();
+                await _unitOfWork.SaveAsync();
 
                 TempData["success"] = "Category updated successfully!";
-                // Redirect to the Index action after successful update
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
-            // If model state is not valid, return the view with the current model
+
             return View(category);
         }
-        public IActionResult Delete(int? id)
+
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
-            // Fetch the category from the database
-            var categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
-            if (categoryFromDb == null)
+
+            var category = await _unitOfWork.Category.GetAsync(u => u.Id == id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+
+            return View(category);
         }
 
         [HttpPost, ActionName("Delete")]
-        public IActionResult Delete(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
-            if (categoryFromDb == null)
+            var category = await _unitOfWork.Category.GetAsync(u => u.Id == id, tracked: true);
+            if (category == null)
             {
                 return NotFound();
             }
-            // Remove the category from the database
-            _unitOfWork.Category.Remove(categoryFromDb);
-            _unitOfWork.Save();
+
+            _unitOfWork.Category.Remove(category);
+            await _unitOfWork.SaveAsync();
 
             TempData["success"] = "Category deleted successfully!";
-            // Redirect to the Index action after successful deletion
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }

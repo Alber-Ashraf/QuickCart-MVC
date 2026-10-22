@@ -1,161 +1,220 @@
 ﻿@model ProductVM
 
 @{
-    ViewData["Title"] = "Create Product";
+    var isEdit = Model.Product.Id != 0;
+    ViewData["Title"] = isEdit ? $"Edit: {Model.Product.Title}" : "Create New Product";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-dark text-white text-center rounded-top-4">
-                    <h4 class="mb-0">
-                        <i class="bi bi-box-seam me-2"></i> @(Model.Product.Id!=0?"Update":"Create") Product
-                    </h4>
+@section Breadcrumbs {
+    <a asp-area="Admin" asp-controller="Product" asp-action="Index">Inventory</a>
+    <span class="separator">/</span>
+    <span class="current">@(isEdit ? "Edit Product" : "New Product")</span>
+}
+
+<div class="product-upsert-container py-2">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="page-title mb-1">
+                <i class="bi bi-box-seam text-primary me-2"></i> @(isEdit ? "Edit Product" : "Create New Product")
+            </h1>
+            <p class="page-subtitle mb-0">Configure product specifications, tiered wholesale rates, and promotional media.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary qc-btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Products
+        </a>
+    </div>
+
+    <form asp-action="Upsert" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Product.Id" />
+
+        <div class="row g-4">
+            <!-- Left Column: Core Metadata & Volume Pricing -->
+            <div class="col-lg-8">
+                <!-- Basic Information Card -->
+                <div class="qc-card p-4 p-md-5 mb-4">
+                    <h2 class="fs-6 fw-bold text-uppercase text-muted letter-spacing-wide mb-4">
+                        <i class="bi bi-info-circle me-1 text-primary"></i> General Information
+                    </h2>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Product.Title" class="form-label small fw-semibold text-secondary">
+                                Product Title <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-book input-prefix-icon"></i>
+                                <input asp-for="Product.Title" class="form-control qc-input" placeholder="e.g. Design Systems Handbook" />
+                            </div>
+                            <span asp-validation-for="Product.Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Product.Author" class="form-label small fw-semibold text-secondary">
+                                Author <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-person input-prefix-icon"></i>
+                                <input asp-for="Product.Author" class="form-control qc-input" placeholder="e.g. Alex Morgan" />
+                            </div>
+                            <span asp-validation-for="Product.Author" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Product.ISBN" class="form-label small fw-semibold text-secondary">
+                                ISBN <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-upc-scan input-prefix-icon"></i>
+                                <input asp-for="Product.ISBN" class="form-control qc-input font-mono" placeholder="e.g. 978-3-16-148410-0" />
+                            </div>
+                            <span asp-validation-for="Product.ISBN" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Product.Description" class="form-label small fw-semibold text-secondary">
+                                Product Description
+                            </label>
+                            <textarea asp-for="Product.Description" class="form-control qc-input" rows="5" placeholder="Detailed product summary, edition notes, table of contents..."></textarea>
+                            <span asp-validation-for="Product.Description" class="text-danger small"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body bg-light rounded-bottom-4">
-                    <form asp-action="Upsert" method="post" enctype="multipart/form-data">
-                        <input type="hidden" asp-for="Product.Id" />
-                        @*                         <input type="hidden" asp-for="Product.ImageURL" />
- *@                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Product.Title" class="form-control" placeholder="Title" />
-                                    <label asp-for="Product.Title"><i class="bi bi-type me-2"></i>Title</label>
-                                    <span asp-validation-for="Product.Title" class="text-danger small"></span>
-                                </div>
+
+                <!-- Tiered Wholesale Pricing Matrix Card -->
+                <div class="qc-card p-4 p-md-5 mb-4">
+                    <h2 class="fs-6 fw-bold text-uppercase text-muted letter-spacing-wide mb-2">
+                        <i class="bi bi-layers-fill me-1 text-primary"></i> Tiered Volume Pricing Matrix
+                    </h2>
+                    <p class="text-muted small mb-4">Set wholesale discounts based on ordered unit volumes.</p>
+
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-3">
+                            <label asp-for="Product.ListPrice" class="form-label small fw-semibold text-secondary">
+                                List Price (MSRP) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-currency-dollar input-prefix-icon"></i>
+                                <input asp-for="Product.ListPrice" type="number" step="0.01" class="form-control qc-input font-mono" placeholder="0.00" />
                             </div>
+                            <span asp-validation-for="Product.ListPrice" class="text-danger small"></span>
+                        </div>
 
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Product.Author" class="form-control" placeholder="Author" />
-                                    <label asp-for="Product.Author"><i class="bi bi-person-lines-fill me-2"></i>Author</label>
-                                    <span asp-validation-for="Product.Author" class="text-danger small"></span>
-                                </div>
+                        <div class="col-sm-6 col-md-3">
+                            <label asp-for="Product.Price" class="form-label small fw-semibold text-secondary">
+                                Base Price (1–50) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-currency-dollar input-prefix-icon"></i>
+                                <input asp-for="Product.Price" type="number" step="0.01" class="form-control qc-input font-mono" placeholder="0.00" />
                             </div>
+                            <span asp-validation-for="Product.Price" class="text-danger small"></span>
+                        </div>
 
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <textarea asp-for="Product.Description" class="form-control" style="height: 100px;" placeholder="Description"></textarea>
-                                    <label asp-for="Product.Description"><i class="bi bi-card-text me-2"></i>Description</label>
-                                    <span asp-validation-for="Product.Description" class="text-danger small"></span>
-                                </div>
+                        <div class="col-sm-6 col-md-3">
+                            <label asp-for="Product.Price50" class="form-label small fw-semibold text-secondary">
+                                Tier 50+ Price <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-currency-dollar input-prefix-icon"></i>
+                                <input asp-for="Product.Price50" type="number" step="0.01" class="form-control qc-input font-mono" placeholder="0.00" />
                             </div>
+                            <span asp-validation-for="Product.Price50" class="text-danger small"></span>
+                        </div>
 
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Product.ISBN" class="form-control" placeholder="ISBN" />
-                                    <label asp-for="Product.ISBN"><i class="bi bi-upc-scan me-2"></i>ISBN</label>
-                                    <span asp-validation-for="Product.ISBN" class="text-danger small"></span>
-                                </div>
+                        <div class="col-sm-6 col-md-3">
+                            <label asp-for="Product.Price100" class="form-label small fw-semibold text-secondary">
+                                Tier 100+ Bulk <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-currency-dollar input-prefix-icon"></i>
+                                <input asp-for="Product.Price100" type="number" step="0.01" class="form-control qc-input font-mono" placeholder="0.00" />
                             </div>
+                            <span asp-validation-for="Product.Price100" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Product.ListPrice" class="form-control" placeholder="List Price" />
-                                    <label asp-for="Product.ListPrice"><i class="bi bi-tag me-2"></i>List Price</label>
-                                    <span asp-validation-for="Product.ListPrice" class="text-danger small"></span>
-                                </div>
-                            </div>
+            <!-- Right Column: Taxonomy, Media & Actions -->
+            <div class="col-lg-4">
+                <!-- Taxonomy Card -->
+                <div class="qc-card p-4 mb-4">
+                    <h2 class="fs-6 fw-bold text-uppercase text-muted letter-spacing-wide mb-3">
+                        <i class="bi bi-folder2 me-1 text-primary"></i> Taxonomy & Category
+                    </h2>
 
-                            <div class="col-md-4">
-                                <div class="form-floating">
-                                    <input asp-for="Product.Price" class="form-control" placeholder="Price for 1-50" />
-                                    <label asp-for="Product.Price"><i class="bi bi-cash-stack me-2"></i>Price (1-50)</label>
-                                    <span asp-validation-for="Product.Price" class="text-danger small"></span>
-                                </div>
-                            </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.CategoryId" class="form-label small fw-semibold text-secondary">
+                            Assigned Category <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="Product.CategoryId" asp-items="@Model.CategoryList" class="form-select qc-input">
+                            <option value="" disabled selected>-- Select Category --</option>
+                        </select>
+                        <span asp-validation-for="Product.CategoryId" class="text-danger small"></span>
+                    </div>
+                </div>
 
-                            <div class="col-md-4">
-                                <div class="form-floating">
-                                    <input asp-for="Product.Price50" class="form-control" placeholder="Price for 50+" />
-                                    <label asp-for="Product.Price50"><i class="bi bi-cash me-2"></i>Price (50+)</label>
-                                    <span asp-validation-for="Product.Price50" class="text-danger small"></span>
-                                </div>
-                            </div>
+                <!-- Media Asset Management Card -->
+                <div class="qc-card p-4 mb-4">
+                    <h2 class="fs-6 fw-bold text-uppercase text-muted letter-spacing-wide mb-3">
+                        <i class="bi bi-images me-1 text-primary"></i> Media Assets
+                    </h2>
 
-                            <div class="col-md-4">
-                                <div class="form-floating">
-                                    <input asp-for="Product.Price100" class="form-control" placeholder="Price for 100+" />
-                                    <label asp-for="Product.Price100"><i class="bi bi-currency-dollar me-2"></i>Price (100+)</label>
-                                    <span asp-validation-for="Product.Price100" class="text-danger small"></span>
-                                </div>
-                            </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">
+                            Upload Artwork Images
+                        </label>
+                        <input type="file" name="files" multiple class="form-control qc-input" />
+                        <span asp-validation-for="Product.ProductImages" class="text-danger small"></span>
+                        <div class="form-text small text-muted">Supports PNG, JPG, WebP formats.</div>
+                    </div>
 
-                            <div class="mb-4">
-                                <label asp-for="Product.ProductImages" class="form-label fw-semibold">
-                                    <i class="bi bi-image me-2"></i> Upload Image
-                                </label>
-                                <input type="file" name="files" class="form-control bg-white" />
-                                <span asp-validation-for="Product.ProductImages" class="text-danger small"></span>
-
-                                @if (Model.Product.ProductImages != null && Model.Product.ProductImages.Any())
+                    <!-- Existing Image Previews -->
+                    @if (Model.Product.ProductImages != null && Model.Product.ProductImages.Any())
+                    {
+                        <div class="mt-3">
+                            <span class="small fw-bold text-muted text-uppercase d-block mb-2">
+                                Existing Assets (@Model.Product.ProductImages.Count)
+                            </span>
+                            <div class="row g-2">
+                                @foreach (var image in Model.Product.ProductImages)
                                 {
-                                    <div class="d-flex justify-content-center overflow-auto py-3" style="white-space: nowrap;">
-                                        @foreach (var image in Model.Product.ProductImages)
-                                        {
-                                            <div class="d-inline-block me-3 text-center">
-                                                <div class="card shadow-sm" style="width: 200px;">
-                                                    <img src="@image.ImageUrl"
-                                                         alt="Product Image"
-                                                         class="card-img-top rounded-top"
-                                                         style="height: 250px; object-fit: cover;" />
-                                                    <div class="card-body p-2">
-                                                        <a asp-action="DeleteImage" asp-route-imageId="@image.Id" class="btn btn-sm btn-danger rounded-pill w-100">
-                                                            <i class="bi bi-trash3"></i> Delete
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
+                                    <div class="col-6">
+                                        <div class="border border-subtle rounded-2 p-2 bg-surface text-center position-relative">
+                                            <img src="@image.ImageUrl"
+                                                 alt="Product Asset"
+                                                 class="img-fluid rounded-1 mb-2"
+                                                 style="height: 100px; object-fit: contain;" />
+                                            <a asp-action="DeleteImage"
+                                               asp-route-imageId="@image.Id"
+                                               class="btn btn-sm btn-outline-danger w-100 py-1"
+                                               onclick="return confirm('Remove this image asset?');">
+                                                <i class="bi bi-trash3 me-1"></i> Delete
+                                            </a>
+                                        </div>
                                     </div>
-                                }
-                                
-                            </div>
-
-
-                            <div class="container mt-3 d-flex justify-content-center">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <select asp-for="@Model.Product.CategoryId" asp-items="@Model.CategoryList" class="form-select" placeholder="CategoryId">
-                                            <option disabled selected>-- Select Category --</option>
-                                        </select>
-                                        <label asp-for="Product.CategoryId">
-                                            <i class="bi bi-hash me-2"></i>Category
-                                        </label>
-                                        <span asp-validation-for="Product.CategoryId" class="text-danger small"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <div class="d-flex justify-content-between mt-4">
-                                <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
-                                    <i class="bi bi-arrow-left-circle me-1"></i> Back
-                                </a>
-                                @if (Model.Product.Id != 0)
-                                {
-                                    <button type="submit" class="btn btn-success px-4 rounded-pill">
-                                        <i class="bi bi-check-circle me-1"></i> Update
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button type="submit" class="btn btn-success px-4 rounded-pill">
-                                    <i class="bi bi-check-circle me-1"></i> Create
-                                    </button>
                                 }
                             </div>
                         </div>
-                    </form>
+                    }
+                </div>
+
+                <!-- Form Action Buttons Card -->
+                <div class="qc-card p-4">
+                    <button type="submit" class="btn btn-primary qc-btn-primary w-100 py-2 justify-content-center mb-2" data-loading-text="Saving Product...">
+                        <i class="bi bi-check2-circle me-1"></i> @(isEdit ? "Update Product" : "Publish Product")
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary qc-btn-secondary w-100 justify-content-center">
+                        Cancel
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

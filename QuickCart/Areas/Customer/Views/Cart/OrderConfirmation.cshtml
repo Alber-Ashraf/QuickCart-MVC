@@ -1,17 +1,64 @@
 ﻿@model int
 
-<div class="container py-5 text-center">
-    <h2 class="text-success mb-4">Thank you for your order!</h2>
-    <p class="lead">Your order has been successfully confirmed.</p>
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
 
-    @if (@Model != null)
-    {
-        <p>Your order ID is: <strong>@Model</strong></p>
-    }
+@section Breadcrumbs {
+    <a asp-area="Customer" asp-controller="Home" asp-action="Index">Storefront</a>
+    <span class="separator">/</span>
+    <span class="current">Order Confirmation</span>
+}
 
-    <div class="mt-4">
-        <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary">
-            Back to Home
-        </a>
+<div class="confirmation-container py-5 d-flex justify-content-center">
+    <div class="qc-card p-5 text-center shadow-sm" style="max-width: 580px; width: 100%;">
+        <!-- Success Animated Icon -->
+        <div class="mb-4">
+            <div class="empty-state-icon-circle mx-auto bg-success-subtle text-success" style="width: 76px; height: 76px;">
+                <i class="bi bi-check-lg fs-1"></i>
+            </div>
+        </div>
+
+        <h1 class="h3 fw-bold text-primary mb-2">Order Confirmed!</h1>
+        <p class="text-muted mb-4">
+            Thank you for your purchase. We have received your order and our fulfillment team has started processing it.
+        </p>
+
+        <!-- Order Tracking Box -->
+        <div class="p-3 bg-subtle rounded-3 border border-subtle mb-4">
+            <span class="text-muted small text-uppercase fw-bold letter-spacing-wide d-block">
+                Order Tracking Reference
+            </span>
+            <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
+                <span class="fs-4 font-mono fw-bold text-primary">#@Model</span>
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary qc-btn-secondary py-0 px-2"
+                        onclick="navigator.clipboard.writeText('@Model'); this.innerHTML = '<i class=\'bi bi-check\'></i> Copied';"
+                        title="Copy Reference ID">
+                    <i class="bi bi-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Next Steps Note -->
+        <div class="text-start p-3 bg-surface border border-subtle rounded-2 mb-4 small text-muted">
+            <div class="d-flex gap-2">
+                <i class="bi bi-info-circle text-primary mt-1"></i>
+                <div>
+                    <span class="fw-semibold text-secondary d-block">Fulfillment Lifecycle:</span>
+                    You will receive order status notifications and tracking updates as the warehouse completes packaging and carrier pickup.
+                </div>
+            </div>
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+            <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-orderId="@Model" class="btn btn-primary qc-btn-primary">
+                <i class="bi bi-receipt me-1"></i> View Order Details
+            </a>
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary qc-btn-secondary">
+                <i class="bi bi-shop me-1"></i> Return to Storefront
+            </a>
+        </div>
     </div>
 </div>

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Background: Deep Royal Indigo to Electric Violet -->
+    <linearGradient id="fl-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#3730a3"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+
+    <!-- Left Open Page Gradient -->
+    <linearGradient id="fl-left-page" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e0e7ff"/>
+    </linearGradient>
+
+    <!-- Right Base Page Gradient -->
+    <linearGradient id="fl-right-page" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#c7d2fe"/>
+    </linearGradient>
+
+    <!-- Dynamic Turning Flyleaf Page -->
+    <linearGradient id="fl-turning-page" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="60%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+
+    <!-- Emerald Ribbon Bookmark Accent -->
+    <linearGradient id="fl-ribbon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App Canvas Base with Subtle Bevel Border -->
+  <rect width="64" height="64" rx="16" fill="url(#fl-bg)"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="15.5" fill="none" stroke="#a5b4fc" stroke-opacity="0.25" stroke-width="1"/>
+
+  <!-- Book Geometry -->
+  <g>
+    <!-- Subtle base shadow under pages -->
+    <path d="M11 44C18 41 25 40.5 32 42.5C39 40.5 46 41 53 44C47 46 39 45.5 32 44.5C25 45.5 17 46 11 44Z"
+          fill="#0f172a" fill-opacity="0.45"/>
+    <!-- Book Base / Cover Rim -->
+    <path d="M13 44C19 42 26 41 32 42.8C38 41 45 42 51 44V45.5C45 43.5 38 42.5 32 44.2C26 42.5 19 43.5 13 45.5V44Z"
+          fill="#1e1b4b" fill-opacity="0.55"/>
+
+    <!-- Left Page -->
+    <path d="M32 40.5C24 38 17 38.5 12 40.5V17C18 15 25 15.5 32 17.8V40.5Z"
+          fill="url(#fl-left-page)"/>
+    <!-- Left Page Inner Highlight -->
+    <path d="M32 39.5C25.5 37.5 19 38 13.5 39.6V18C19 16.5 25.5 16.5 32 18.5V39.5Z"
+          fill="#ffffff" fill-opacity="0.6"/>
+
+    <!-- Right Base Page -->
+    <path d="M32 40.5C40 38 47 38.5 52 40.5V17C46 15 39 15.5 32 17.8V40.5Z"
+          fill="url(#fl-right-page)"/>
+
+    <!-- Turning Flyleaf (Fluttering Accent Page) -->
+    <path d="M32 40.5C38 37 44 34.5 49.5 32.5C47 25 41.5 20 32 17.8V40.5Z"
+          fill="url(#fl-turning-page)" fill-opacity="0.95"/>
+
+    <!-- Center Spine Highlight -->
+    <path d="M32 17.5V41.5" stroke="#4338ca" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Silk Bookmark Ribbon -->
+    <path d="M32 17.8V29L35.5 26.5L39 29V18.2" fill="url(#fl-ribbon)"/>
+  </g>
+</svg>

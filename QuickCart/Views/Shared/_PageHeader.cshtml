@@ -1,0 +1,44 @@
+@model QuickCart.Models.ViewModels.PageHeaderVM
+
+<div class="qc-page-header">
+    <div class="page-header-info">
+        <h1 class="page-title">
+            @if (!string.IsNullOrEmpty(Model.IconClass))
+            {
+                <i class="@Model.IconClass me-2 text-primary"></i>
+            }
+            @Model.Title
+        </h1>
+        @if (!string.IsNullOrEmpty(Model.Subtitle))
+        {
+            <p class="page-subtitle">@Model.Subtitle</p>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.ActionUrl) || !string.IsNullOrEmpty(Model.SecondaryActionUrl))
+    {
+        <div class="page-header-actions">
+            @if (!string.IsNullOrEmpty(Model.SecondaryActionUrl))
+            {
+                <a href="@Model.SecondaryActionUrl" class="btn btn-outline-secondary qc-btn-secondary">
+                    @if (!string.IsNullOrEmpty(Model.SecondaryActionIcon))
+                    {
+                        <i class="@Model.SecondaryActionIcon me-1"></i>
+                    }
+                    @Model.SecondaryActionText
+                </a>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ActionUrl))
+            {
+                <a href="@Model.ActionUrl" class="btn btn-primary qc-btn-primary">
+                    @if (!string.IsNullOrEmpty(Model.ActionIcon))
+                    {
+                        <i class="@Model.ActionIcon me-1"></i>
+                    }
+                    @Model.ActionText
+                </a>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,12 @@
+**/.git
+**/.github
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/.editorconfig
+**/*.md
+**/*.user
+**/*.suo
+**/TestResults
+docs/

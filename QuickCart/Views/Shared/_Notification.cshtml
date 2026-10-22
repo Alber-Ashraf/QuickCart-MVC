@@ -1,8 +1,23 @@
-﻿@if (TempData["success"] != null)
+﻿@*
+    XSS-safe Toastr notification receiver.
+    Values are consumed and safely escaped by wwwroot/js/site.js.
+*@
+@if (TempData["success"] != null || TempData["error"] != null || TempData["warning"] != null || TempData["info"] != null)
 {
-	<script src="~/lib/jquery/dist/jquery.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-	<script type="text/javascript">
-		toastr.success('@TempData["success"]');
-	</script>
+    <div id="toast-notifications"
+         data-success="@TempData["success"]"
+         data-error="@TempData["error"]"
+         data-warning="@TempData["warning"]"
+         data-info="@TempData["info"]"
+         class="d-none"
+         aria-hidden="true">
+    </div>
 }
+
+<!-- WCAG 2.2 AA Screen Reader Announcement Live Region -->
+<div id="qc-live-announcer"
+     class="visually-hidden"
+     aria-live="polite"
+     aria-atomic="true"
+     role="status">
+</div>

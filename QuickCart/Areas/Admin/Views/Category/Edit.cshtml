@@ -1,54 +1,65 @@
 ﻿@model Category
 
 @{
-    ViewData["Title"] = "Edit Category";
+    ViewData["Title"] = $"Edit Category: {Model.Name}";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-dark text-white text-center rounded-top-4">
-                    <h4 class="mb-0">
-                        <i class="bi bi-pencil-square me-2"></i> Edit Category
-                    </h4>
-                </div>
-                <div class="card-body bg-light rounded-bottom-4">
-                    <form asp-action="Edit" method="post">
-                        @Html.AntiForgeryToken()
+@section Breadcrumbs {
+    <a asp-area="Admin" asp-controller="Category" asp-action="Index">Taxonomy</a>
+    <span class="separator">/</span>
+    <span class="current">Edit Category</span>
+}
 
-                        <input type="hidden" asp-for="Id" />
-
-                        <div class="form-floating mb-4">
-                            <input asp-for="Name" class="form-control" placeholder="Category Name" />
-                            <label asp-for="Name"><i class="bi bi-tag me-2"></i>Category Name</label>
-                            <span asp-validation-for="Name" class="text-danger small"></span>
-                        </div>
-
-                        <div class="form-floating mb-4">
-                            <input asp-for="DisplayOrder" class="form-control" placeholder="Display Order" />
-                            <label asp-for="DisplayOrder"><i class="bi bi-list-ol me-2"></i>Display Order</label>
-                            <span asp-validation-for="DisplayOrder" class="text-danger small"></span>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-3">
-                            <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
-                                <i class="bi bi-arrow-left-circle me-1"></i> Back
-                            </a>
-                            <button type="submit" class="btn btn-success px-4 rounded-pill">
-                                <i class="bi bi-save2 me-1"></i> Save Changes
-                            </button>
-                        </div>
-                    </form>
-                </div>
+<div class="category-form-container py-2 d-flex justify-content-center">
+    <div class="qc-card p-4 p-md-5" style="max-width: 600px; width: 100%;">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="empty-state-icon-circle bg-primary-subtle text-primary" style="width: 48px; height: 48px;">
+                <i class="bi bi-pencil-square fs-4"></i>
+            </div>
+            <div>
+                <h1 class="fs-5 fw-bold text-primary mb-1">Edit Category</h1>
+                <p class="small text-muted mb-0">Modify taxonomy naming or display ordering.</p>
             </div>
         </div>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label small fw-semibold text-secondary">
+                    Category Name <span class="text-danger">*</span>
+                </label>
+                <div class="input-icon-group">
+                    <i class="bi bi-tag input-prefix-icon"></i>
+                    <input asp-for="Name" class="form-control qc-input" placeholder="Category Name" autofocus />
+                </div>
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DisplayOrder" class="form-label small fw-semibold text-secondary">
+                    Display Order Sequence <span class="text-danger">*</span>
+                </label>
+                <div class="input-icon-group">
+                    <i class="bi bi-sort-numeric-down input-prefix-icon"></i>
+                    <input asp-for="DisplayOrder" class="form-control qc-input font-mono" placeholder="Display Order" />
+                </div>
+                <span asp-validation-for="DisplayOrder" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end pt-3 border-top border-subtle">
+                <a asp-action="Index" class="btn btn-outline-secondary qc-btn-secondary">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary qc-btn-primary" data-loading-text="Updating...">
+                    <i class="bi bi-check2 me-1"></i> Update Category
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

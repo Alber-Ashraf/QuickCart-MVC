@@ -1,87 +1,199 @@
 ﻿@model ShoppingCartVM
 
-<form method="post">
-    <div class="container my-5">
-        <div class="card shadow-lg border-0 rounded-4">
-            <!-- Header -->
-            <div class="card-header bg-dark text-white rounded-top-4 py-4 px-4 d-flex justify-content-between align-items-center">
-                <h4 class="mb-0"><i class="bi bi-truck me-2"></i> Checkout</h4>
-                <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-outline-light rounded-pill btn-sm fw-semibold">
-                    <i class="bi bi-arrow-left-circle me-1"></i> Back to Cart
-                </a>
-            </div>
+@{
+    ViewData["Title"] = "Checkout Summary";
+}
 
-            <!-- Body -->
-            <div class="card-body px-4 py-5 bg-light rounded-bottom-4">
-                <div class="row g-4">
-                    <!-- Shipping Details -->
-                    <div class="col-12 col-lg-6">
-                        <h5 class="text-primary mb-4">Shipping Details</h5>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Full Name</label>
-                            <input asp-for="OrderHeader.Name" type="text" class="form-control shadow-sm rounded" placeholder="Enter your name" />
+@section Breadcrumbs {
+    <a asp-area="Customer" asp-controller="Home" asp-action="Index">Storefront</a>
+    <span class="separator">/</span>
+    <a asp-area="Customer" asp-controller="Cart" asp-action="Index">Cart</a>
+    <span class="separator">/</span>
+    <span class="current">Checkout</span>
+}
+
+<div class="checkout-container py-2">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="page-title mb-1">
+                <i class="bi bi-shield-lock text-primary me-2"></i> Secure Checkout
+            </h1>
+            <p class="page-subtitle mb-0">Provide fulfillment details and verify your order manifest.</p>
+        </div>
+        <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-sm btn-outline-secondary qc-btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Edit Cart
+        </a>
+    </div>
+
+    <form method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-4">
+            <!-- Left: Shipping & Recipient Details Form -->
+            <div class="col-lg-7">
+                <div class="qc-card p-4 p-md-5 mb-4">
+                    <h2 class="fs-6 fw-bold text-uppercase text-muted letter-spacing-wide mb-4">
+                        <i class="bi bi-geo-alt-fill me-1 text-primary"></i> Shipping & Recipient Details
+                    </h2>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="OrderHeader.Name" class="form-label small fw-semibold text-secondary">
+                                Full Name <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-person input-prefix-icon"></i>
+                                <input asp-for="OrderHeader.Name"
+                                       class="form-control qc-input"
+                                       placeholder="e.g. John Doe" />
+                            </div>
                             <span asp-validation-for="OrderHeader.Name" class="text-danger small"></span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Phone Number</label>
-                            <input asp-for="OrderHeader.PhoneNumber" type="text" class="form-control shadow-sm rounded" placeholder="Enter your phone number" />
+
+                        <div class="col-12">
+                            <label asp-for="OrderHeader.PhoneNumber" class="form-label small fw-semibold text-secondary">
+                                Phone Number <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-telephone input-prefix-icon"></i>
+                                <input asp-for="OrderHeader.PhoneNumber"
+                                       class="form-control qc-input font-mono"
+                                       placeholder="e.g. +1 (555) 000-1234" />
+                            </div>
                             <span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger small"></span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Street Address</label>
-                            <input asp-for="OrderHeader.Address" type="text" class="form-control shadow-sm rounded" placeholder="123 Main St" />
+
+                        <div class="col-12">
+                            <label asp-for="OrderHeader.Address" class="form-label small fw-semibold text-secondary">
+                                Street Address <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-house-door input-prefix-icon"></i>
+                                <input asp-for="OrderHeader.Address"
+                                       class="form-control qc-input"
+                                       placeholder="e.g. 100 Enterprise Way, Suite 400" />
+                            </div>
                             <span asp-validation-for="OrderHeader.Address" class="text-danger small"></span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">City</label>
-                            <input asp-for="OrderHeader.City" type="text" class="form-control shadow-sm rounded" placeholder="City" />
+
+                        <div class="col-md-5">
+                            <label asp-for="OrderHeader.City" class="form-label small fw-semibold text-secondary">
+                                City <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-building input-prefix-icon"></i>
+                                <input asp-for="OrderHeader.City"
+                                       class="form-control qc-input"
+                                       placeholder="e.g. San Francisco" />
+                            </div>
                             <span asp-validation-for="OrderHeader.City" class="text-danger small"></span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">State</label>
-                            <input asp-for="OrderHeader.State" type="text" class="form-control shadow-sm rounded" placeholder="State" />
+
+                        <div class="col-md-4">
+                            <label asp-for="OrderHeader.State" class="form-label small fw-semibold text-secondary">
+                                State / Province <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-map input-prefix-icon"></i>
+                                <input asp-for="OrderHeader.State"
+                                       class="form-control qc-input"
+                                       placeholder="e.g. CA" />
+                            </div>
                             <span asp-validation-for="OrderHeader.State" class="text-danger small"></span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Postal Code</label>
-                            <input asp-for="OrderHeader.PostalCode" type="text" class="form-control shadow-sm rounded" placeholder="ZIP/Postal Code" />
-                            <span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger small"></span>
+
+                        <div class="col-md-3">
+                            <label asp-for="OrderHeader.PostalCode" class="form-label small fw-semibold text-secondary">
+                                ZIP Code <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-icon-group">
+                                <i class="bi bi-mailbox input-prefix-icon"></i>
+                                <input asp-for="OrderHeader.PostalCode"
+                                       class="form-control qc-input font-mono"
+                                       placeholder="e.g. 94107" />
+                            </div>
+                            <span asp-validation-for="OrderHeader.PostalCode" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Order Manifest & Confirmation Sidebar -->
+            <div class="col-lg-5">
+                <div class="qc-card p-4 sticky-top" style="top: 80px;">
+                    <h2 class="fs-6 fw-bold text-uppercase text-muted letter-spacing-wide mb-3">
+                        <i class="bi bi-basket2 me-1 text-primary"></i> Order Manifest
+                    </h2>
+
+                    <!-- Item Lines -->
+                    <div class="manifest-list divide-y mb-3 overflow-auto" style="max-height: 280px;">
+                        @foreach (var detail in Model.ShoppingCartList)
+                        {
+                            <div class="py-2 d-flex justify-content-between align-items-center gap-2">
+                                <div class="text-truncate">
+                                    <div class="fw-semibold text-primary small text-truncate" title="@detail.Product.Title">
+                                        @detail.Product.Title
+                                    </div>
+                                    <span class="small text-muted font-mono">
+                                        Qty: @detail.Count &times; @detail.Price.ToString("C")
+                                    </span>
+                                </div>
+                                <span class="font-mono fw-bold text-secondary flex-shrink-0 small">
+                                    @((detail.Price * detail.Count).ToString("C"))
+                                </span>
+                            </div>
+                        }
+                    </div>
+
+                    <hr class="border-subtle my-3" />
+
+                    <!-- Delivery Window Info -->
+                    <div class="p-3 bg-subtle rounded-2 mb-3">
+                        <div class="d-flex align-items-center gap-2 small text-muted">
+                            <i class="bi bi-calendar-event text-primary"></i>
+                            <div>
+                                <span class="fw-semibold text-secondary">Estimated Delivery Window:</span>
+                                <div class="font-mono">
+                                    @DateTime.Now.AddDays(3).ToString("MMM dd") – @DateTime.Now.AddDays(7).ToString("MMM dd, yyyy")
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Order Summary -->
-                    <div class="col-12 col-lg-6">
-                        <h5 class="text-primary mb-4">Order Summary</h5>
-                        <ul class="list-group mb-4 shadow-sm rounded">
-                            @foreach(var detail in Model.ShoppingCartList)
-                            {
-                                <li class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="fw-semibold">@detail.Product.Title</div>
-                                        <small class="text-muted">@detail.Count</small>
-                                    </div>
-                                    <span>@((detail.Price*detail.Count).ToString("c"))</span>
-                                </li>
-                            }
-                            <!-- Repeat product blocks as needed -->
+                    <!-- Financial Summary -->
+                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                        <span>Items Subtotal</span>
+                        <span class="font-mono">@Model.OrderHeader.OrderTotal.ToString("C")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 small text-muted">
+                        <span>Estimated Shipping</span>
+                        <span class="qc-badge qc-badge-success">Free Tier</span>
+                    </div>
 
-                            <li class="list-group-item bg-light d-flex justify-content-between">
-                                <span class="text-dark fw-semibold">Total (USD):</span>
-                                <strong class="text-success fs-5">@Model.OrderHeader.OrderTotal.ToString("c")</strong>
-                            </li>
-                        </ul>
+                    <div class="d-flex justify-content-between align-items-baseline mb-4 pt-2 border-top border-subtle">
+                        <span class="fw-bold text-primary fs-6">Total Due (USD)</span>
+                        <span class="fs-4 fw-bold font-mono text-primary">
+                            @Model.OrderHeader.OrderTotal.ToString("C")
+                        </span>
+                    </div>
 
-                        <p class="text-muted small mb-2">
-                            <i class="bi bi-calendar-check me-1 text-info"></i> Estimated Delivery:
-                            @DateTime.Now.AddDays(7).ToShortDateString() - @DateTime.Now.AddDays(14).ToShortDateString()
-                        </p>
+                    <!-- Submit / Place Order CTA -->
+                    <button type="submit"
+                            class="btn btn-primary qc-btn-primary w-100 py-3 justify-content-center fs-6"
+                            data-loading-text="Securing Order & Redirecting...">
+                        <i class="bi bi-shield-check me-2"></i> Confirm & Authorize Order
+                    </button>
 
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm">
-                            <i class="bi bi-bag-check-fill me-2"></i> Place Order
-                        </button>
+                    <div class="text-center mt-3 text-muted small">
+                        <i class="bi bi-lock-fill me-1"></i> Authorized via Stripe Payments Engine
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

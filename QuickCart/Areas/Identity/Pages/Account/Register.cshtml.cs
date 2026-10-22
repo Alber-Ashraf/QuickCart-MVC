@@ -1,6 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -125,39 +125,18 @@ namespace QuickCart.Areas.Identity.Pages.Account
             public IEnumerable<SelectListItem> Company_List { get; set; }
         }
 
-
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string? returnUrl = null)
         {
-            if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
-            {
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Company)).GetAwaiter().GetResult();
+            Input = new InputModel();
+            PopulateAdminDropdowns(Input);
 
-            }
-
-            Input = new InputModel
-            {
-                Role_List = _roleManager.Roles.Select(i => i.Name).Select(i => new SelectListItem
-                {
-                    Text = i,
-                    Value = i
-                }),
-                Company_List = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
-                {
-                    Text = i.Name,
-                    Value = i.Id.ToString()
-                })
-            };
-
-            ReturnUrl = returnUrl;
+            ReturnUrl = SD.CleanReturnUrl(returnUrl);
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl = SD.CleanReturnUrl(returnUrl);
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
@@ -172,9 +151,18 @@ namespace QuickCart.Areas.Identity.Pages.Account
                 user.PostalCode = Input.PostalCode;
                 user.PhoneNumber = Input.PhoneNumber;
 
-                if (Input.Role == SD.Role_Company)
+                // Enforce role assignment security: only Admin can set Company or elevated roles
+                string assignedRole = SD.Role_Customer;
+                if (User.IsInRole(SD.Role_Admin))
                 {
-                    user.CompanyId = Input.CompanyId;
+                    if (!string.IsNullOrEmpty(Input.Role))
+                    {
+                        assignedRole = Input.Role;
+                    }
+                    if (assignedRole == SD.Role_Company)
+                    {
+                        user.CompanyId = Input.CompanyId;
+                    }
                 }
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -183,14 +171,7 @@ namespace QuickCart.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (!string.IsNullOrEmpty(Input.Role))
-                    {
-                        await _userManager.AddToRoleAsync(user, Input.Role);
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, SD.Role_Customer);
-                    }
+                    await _userManager.AddToRoleAsync(user, assignedRole);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -227,8 +208,27 @@ namespace QuickCart.Areas.Identity.Pages.Account
                 }
             }
 
+            PopulateAdminDropdowns(Input);
+
             // If we got this far, something failed, redisplay form
             return Page();
+        }
+
+        private void PopulateAdminDropdowns(InputModel input)
+        {
+            if (User.IsInRole(SD.Role_Admin))
+            {
+                input.Role_List = _roleManager.Roles.Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Name
+                });
+                input.Company_List = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
+            }
         }
 
         private ApplicationUser CreateUser()

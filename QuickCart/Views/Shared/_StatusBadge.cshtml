@@ -1,0 +1,26 @@
+@model string
+
+@{
+    var status = Model?.ToLower() ?? "pending";
+    var (badgeClass, icon, label) = status switch
+    {
+        "approved" or "paymentstatusapproved" => ("qc-badge-success", "bi-check-circle-fill", "Approved"),
+        "pending" or "paymentstatuspending" => ("qc-badge-warning", "bi-hourglass-split", "Pending"),
+        "inprocess" or "processing" => ("qc-badge-info", "bi-arrow-repeat", "In Process"),
+        "shipped" => ("qc-badge-accent", "bi-truck", "Shipped"),
+        "completed" => ("qc-badge-success", "bi-check2-all", "Completed"),
+        "cancelled" => ("qc-badge-danger", "bi-x-circle-fill", "Cancelled"),
+        "refunded" => ("qc-badge-muted", "bi-arrow-counterclockwise", "Refunded"),
+        "delayedpayment" => ("qc-badge-warning", "bi-clock-history", "Net 30 Due"),
+        "admin" => ("qc-badge-accent", "bi-shield-check", "Administrator"),
+        "employee" => ("qc-badge-info", "bi-person-badge", "Employee"),
+        "company" => ("qc-badge-muted", "bi-building", "Company"),
+        "customer" => ("qc-badge-muted", "bi-person", "Customer"),
+        _ => ("qc-badge-muted", "bi-circle", Model ?? "Unknown")
+    };
+}
+
+<span class="qc-badge @badgeClass">
+    <i class="bi @icon"></i>
+    <span>@label</span>
+</span>

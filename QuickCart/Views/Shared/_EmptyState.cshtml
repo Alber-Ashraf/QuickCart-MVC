@@ -1,0 +1,19 @@
+@model QuickCart.Models.ViewModels.EmptyStateVM
+
+<div class="qc-empty-state">
+    <div class="empty-state-illustration">
+        <div class="empty-state-icon-circle">
+            <i class="@(string.IsNullOrEmpty(Model.IconClass) ? "bi bi-inbox" : Model.IconClass)"></i>
+        </div>
+    </div>
+    <h3 class="empty-state-heading">@Model.Title</h3>
+    <p class="empty-state-copy">@Model.Description</p>
+    @if (!string.IsNullOrEmpty(Model.ActionText) && !string.IsNullOrEmpty(Model.ActionUrl))
+    {
+        <div class="empty-state-cta">
+            <a href="@Model.ActionUrl" class="btn btn-primary qc-btn-primary">
+                @Model.ActionText
+            </a>
+        </div>
+    }
+</div>

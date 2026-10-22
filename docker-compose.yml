@@ -1,0 +1,43 @@
+services:
+  quickcart-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quickcart-web
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=quickcart-sql,1433;Database=QuickCartDb;User Id=sa;Password=${SA_PASSWORD:-Password_12345!};TrustServerCertificate=True;MultipleActiveResultSets=true
+      - Stripe__SecretKey=${STRIPE_SECRET_KEY}
+      - Stripe__PublishableKey=${STRIPE_PUBLISHABLE_KEY}
+      - Backblaze__BucketName=${BACKBLAZE_BUCKET_NAME:-flyleaf-books}
+      - Backblaze__Region=${BACKBLAZE_REGION:-us-east-005}
+      - Backblaze__AccessKey=${BACKBLAZE_ACCESS_KEY}
+      - Backblaze__SecretKey=${BACKBLAZE_SECRET_KEY}
+      - Backblaze__Endpoint=${BACKBLAZE_ENDPOINT:-https://s3.us-east-005.backblazeb2.com}
+      - OAuthSettings__GoogleClientId=${GOOGLE_CLIENT_ID}
+      - OAuthSettings__GoogleClientSecret=${GOOGLE_CLIENT_SECRET}
+    ports:
+      - "5000:8080"
+    depends_on:
+      quickcart-sql:
+        condition: service_healthy
+
+  quickcart-sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: quickcart-sql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD:-Password_12345!}
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    volumes:
+      - sql-data:/var/opt/mssql
+
+volumes:
+  sql-data:

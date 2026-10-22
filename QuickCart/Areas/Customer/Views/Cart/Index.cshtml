@@ -1,152 +1,200 @@
 ﻿@model ShoppingCartVM
+@using QuickCart.Models.ViewModels
 
 @{
     ViewData["Title"] = "Shopping Cart";
+    var itemCount = Model.ShoppingCartList?.Count() ?? 0;
 }
 
-<div class="container mt-5">
-    <div class="card shadow-lg border-0 rounded-4">
+@section Breadcrumbs {
+    <a asp-area="Customer" asp-controller="Home" asp-action="Index">Storefront</a>
+    <span class="separator">/</span>
+    <span class="current">Shopping Cart</span>
+}
 
-        <!-- Header -->
-        <div class="card-header bg-dark text-white rounded-top-4 py-4 d-flex justify-content-between align-items-center px-4">
-            <h4 class="mb-0">
-                <i class="bi bi-cart4 me-2"></i> Your Shopping Cart
-            </h4>
-            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-light nav-link text-light">
-                <i class="bi bi-arrow-left-circle me-1 "></i> Continue Shopping
-            </a>
+<div class="cart-container py-2">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="page-title mb-1">
+                <i class="bi bi-cart4 text-primary me-2"></i> Shopping Cart
+            </h1>
+            <p class="page-subtitle mb-0">Review items, adjust quantities, and proceed to secure checkout.</p>
         </div>
+        <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary qc-btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+        </a>
+    </div>
 
-        <!-- Body -->
-        <div class="card-body bg-light rounded-bottom-4">
-            @if (Model.ShoppingCartList.Any())
-            {
-                @foreach (var item in Model.ShoppingCartList)
-                {
-                    <div class="row g-0 bg-white border rounded-4 shadow-sm my-3 py-3 px-2 align-items-center position-relative">
-                        <!-- Product Image -->
-                        <div class="col-md-2 text-center">
-                            @if (item.Product.ProductImages != null && item.Product.ProductImages.Any())
-                            {
-                                <img src="@Url.Content(item.Product.ProductImages.First().ImageUrl)"
-                                     class="img-fluid rounded-4 bg-white"
-                                     style="width: 100%; height: 150px; object-fit: contain;" />
-                            }
-                            else
-                            {
-                                <img src="https://placehold.co/500x600/png"
-                                     class="img-fluid rounded-4 bg-white"
-                                     style="width: 100%; height: 150px; object-fit: contain;" />
-                            }
-                        </div>
-
-                        <!-- Product Details -->
-                        <div class="col-md-7">
-                            <h5 class="text-dark fw-bold mb-1">@item.Product.Title</h5>
-                            <p class="mb-0 text-muted"><small>@item.Product.Author</small></p>
-                            <p class="text-muted small d-none d-md-block">@Html.Raw(item.Product.Description)</p>
-
-                            <div class="mt-2">
-                                <span class="badge bg-primary-subtle text-primary fw-medium rounded-pill me-2">
-                                    Category: @item.Product.Category?.Name
-                                </span>
-                                <span class="badge bg-info-subtle text-info fw-medium rounded-pill">
-                                    ISBN: @item.Product.ISBN
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Quantity & Price -->
-                        <div class="col-md-3 text-center text-md-end mt-3 mt-md-0">
-                            <div class="d-flex justify-content-center justify-content-md-end align-items-center mb-2">
-                                <a asp-action="minus" asp-route-cartId="@item.Id" class="btn btn-outline-secondary btn-sm rounded-circle me-2">
-                                    <i class="bi bi-dash"></i>
-                                </a>
-
-                                <span id="count-@item.Id" class="fw-bold mx-2 fs-5">@item.Count</span>
-
-                                <a href="#" onclick="validateMax(@item.Id, @item.Count)" class="btn btn-outline-secondary btn-sm rounded-circle ms-2">
-                                    <i class="bi bi-plus"></i>
-                                </a>
-                            </div>
-
-                            <!-- Quantity validation message -->
-                            <div id="countValidation-@item.Id" class="text-danger small mt-1 fw-medium" style="display:none;">
-                                Max quantity is 1000.
-                            </div>
-
-                            <p class="fw-semibold mb-1">
-                                Unit Price:
-                                <span class="text-primary">@item.Price.ToString("C")</span>
-                                @if (item.Price < item.Product.Price)
-                                {
-                                    <span class="text-muted text-decoration-line-through small ms-1">
-                                        @item.Product.Price.ToString("C")
-                                    </span>
-                                }
-                            </p>
-
-                            <p class="fw-bold fs-6 mb-0">
-                                Subtotal:
-                                <span class="text-success">@((item.Price * item.Count).ToString("C"))</span>
-                            </p>
-
-                            <div class="mt-3">
-                                <a asp-action="remove" asp-route-cartId="@item.Id" class="btn btn-sm btn-danger rounded-pill shadow-sm">
-                                    <i class="bi bi-trash3-fill me-1"></i> Remove
-                                </a>
-                            </div>
-                        </div>
+    @if (Model.ShoppingCartList != null && Model.ShoppingCartList.Any())
+    {
+        <div class="row g-4">
+            <!-- Left: Cart Items List -->
+            <div class="col-lg-8">
+                <div class="qc-card overflow-hidden">
+                    <div class="p-3 bg-surface-hover border-bottom border-subtle d-flex justify-content-between align-items-center">
+                        <span class="small fw-bold text-uppercase text-muted letter-spacing-wide">
+                            <i class="bi bi-box-seam me-1 text-primary"></i> Cart Items (@itemCount)
+                        </span>
+                        <span class="small text-muted font-mono">Wholesale rates auto-applied</span>
                     </div>
-                }
-            }
-            else
-            {
-                <div class="alert alert-info text-center py-5 mt-3 rounded-4">
-                    <i class="bi bi-cart-x fs-2 me-2"></i> Your cart is currently empty.
-                </div>
-            }
-        </div>
 
-        <!-- Footer -->
-        @if (Model.ShoppingCartList.Any())
-        {
-            <div class="card-footer bg-white border-top-0 rounded-bottom-4 py-4">
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <ul class="list-group mb-4 shadow-sm">
-                            <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
-                                <span class="fw-semibold text-uppercase text-muted">Total (USD):</span>
-                                <span class="fw-bold fs-4 text-success">@Model.OrderHeader.OrderTotal.ToString("C")</span>
-                            </li>
-                        </ul>
-                        <a asp-action="Summary" class="btn btn-primary w-100 fw-bold rounded-pill py-2 shadow">
-                            <i class="bi bi-credit-card-2-front me-2"></i> Proceed to Checkout
-                        </a>
+                    <div class="divide-y">
+                        @foreach (var item in Model.ShoppingCartList)
+                        {
+                            var imgUrl = item.Product.ProductImages?.FirstOrDefault()?.ImageUrl;
+                            var lineTotal = item.Price * item.Count;
+                            var hasVolumeDiscount = item.Price < item.Product.Price;
+
+                            <div class="p-4 d-flex flex-column flex-sm-row gap-3 align-items-sm-center border-bottom border-subtle">
+                                <!-- Artwork -->
+                                <div class="p-2 bg-subtle rounded-2 d-flex align-items-center justify-content-center text-center flex-shrink-0" style="width: 80px; height: 96px;">
+                                    @if (!string.IsNullOrEmpty(imgUrl))
+                                    {
+                                        <img src="@Url.Content(imgUrl)"
+                                             alt="@item.Product.Title"
+                                             class="img-fluid rounded-1"
+                                             style="max-height: 80px; object-fit: contain;" />
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-book fs-3 text-muted"></i>
+                                    }
+                                </div>
+
+                                <!-- Description & Meta -->
+                                <div class="flex-grow-1 min-w-0">
+                                    <h2 class="fs-6 fw-bold text-primary mb-1 text-truncate" title="@item.Product.Title">
+                                        @item.Product.Title
+                                    </h2>
+                                    <p class="small text-muted mb-2">
+                                        by <span class="fw-semibold text-secondary">@item.Product.Author</span>
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                                        <span class="qc-badge qc-badge-accent">
+                                            <i class="bi bi-tag-fill me-1"></i> @(item.Product.Category?.Name ?? "General")
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(item.Product.ISBN))
+                                        {
+                                            <span class="qc-badge qc-badge-muted font-mono">
+                                                ISBN: @item.Product.ISBN
+                                            </span>
+                                        }
+                                        @if (hasVolumeDiscount)
+                                        {
+                                            <span class="qc-badge qc-badge-success">
+                                                <i class="bi bi-check2-circle me-1"></i> Volume Rate Applied
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Quantity Stepper -->
+                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                    <a asp-action="Minus"
+                                       asp-route-cartId="@item.Id"
+                                       class="btn btn-sm btn-outline-secondary qc-btn-secondary px-2 py-1"
+                                       title="Decrease quantity">
+                                        <i class="bi bi-dash"></i>
+                                    </a>
+
+                                    <span class="font-mono fw-bold px-3 py-1 bg-subtle rounded-2 text-center text-primary" style="min-width: 44px;">
+                                        @item.Count
+                                    </span>
+
+                                    <a asp-action="Plus"
+                                       asp-route-cartId="@item.Id"
+                                       class="btn btn-sm btn-outline-secondary qc-btn-secondary px-2 py-1"
+                                       title="Increase quantity">
+                                        <i class="bi bi-plus"></i>
+                                    </a>
+                                </div>
+
+                                <!-- Pricing & Remove -->
+                                <div class="text-sm-end flex-shrink-0" style="min-width: 120px;">
+                                    <div class="fs-6 fw-bold font-mono text-primary">
+                                        @lineTotal.ToString("C")
+                                    </div>
+                                    <div class="small text-muted font-mono">
+                                        @item.Price.ToString("C")/unit
+                                        @if (hasVolumeDiscount)
+                                        {
+                                            <span class="text-decoration-line-through text-muted small ms-1">
+                                                @item.Product.Price.ToString("C")
+                                            </span>
+                                        }
+                                    </div>
+                                    <a asp-action="Remove"
+                                       asp-route-cartId="@item.Id"
+                                       class="btn btn-sm btn-link text-danger p-0 mt-1 text-decoration-none"
+                                       title="Remove from cart">
+                                        <i class="bi bi-trash3 me-1"></i> Remove
+                                    </a>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
-        }
-    </div>
+
+            <!-- Right: Sticky Order Summary Sidebar -->
+            <div class="col-lg-4">
+                <div class="qc-card p-4 sticky-top" style="top: 80px;">
+                    <h2 class="fs-6 fw-bold text-uppercase text-muted letter-spacing-wide mb-3">
+                        <i class="bi bi-receipt me-1 text-primary"></i> Order Summary
+                    </h2>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal (@itemCount items)</span>
+                        <span class="font-mono fw-medium text-secondary">@Model.OrderHeader.OrderTotal.ToString("C")</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Estimated Tax</span>
+                        <span class="font-mono text-muted">Included / Calculated</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Standard Shipping</span>
+                        <span class="qc-badge qc-badge-success">Free Tier</span>
+                    </div>
+
+                    <hr class="border-subtle my-3" />
+
+                    <div class="d-flex justify-content-between align-items-baseline mb-4">
+                        <span class="fw-bold text-primary fs-6">Order Total</span>
+                        <span class="display-6 fw-bold font-mono text-primary">
+                            @Model.OrderHeader.OrderTotal.ToString("C")
+                        </span>
+                    </div>
+
+                    <a asp-action="Summary" class="btn btn-primary qc-btn-primary w-100 py-3 justify-content-center fs-6" data-loading-text="Processing...">
+                        <i class="bi bi-shield-lock me-2"></i> Proceed to Checkout
+                    </a>
+
+                    <div class="mt-4 p-3 bg-subtle rounded-2 border border-subtle">
+                        <div class="d-flex gap-2 align-items-center text-muted small">
+                            <i class="bi bi-shield-check text-success fs-5"></i>
+                            <div>
+                                <span class="fw-semibold d-block text-secondary">Enterprise Guaranteed</span>
+                                <span>256-bit SSL encrypted Stripe checkout</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        var emptyCart = new EmptyStateVM
+        {
+            Title = "Your shopping cart is empty",
+            Description = "Looks like you haven't added any products to your cart yet. Explore our published inventory to select items.",
+            IconClass = "bi bi-cart-x",
+            ActionText = "Explore Catalog",
+            ActionUrl = Url.Action("Index", "Home", new { area = "Customer" })
+        };
+        <partial name="_EmptyState" model="@emptyCart" />
+    }
 </div>
-
-<!-- Hover Animation + Quantity Validation Script -->
-<style>
-    .btn:hover {
-        transform: scale(1.05);
-        transition: all 0.2s ease-in-out;
-    }
-</style>
-
-<script>
-    function validateMax(cartId, currentCount) {
-        const error = document.getElementById('countValidation-' + cartId);
-        if (currentCount >= 1000) {
-            error.style.display = 'block';
-            return false;
-        } else {
-            error.style.display = 'none';
-            window.location.href = '/Customer/Cart/plus?cartId=' + cartId;
-        }
-    }
-</script>

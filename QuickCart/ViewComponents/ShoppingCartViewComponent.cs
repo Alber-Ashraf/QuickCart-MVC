@@ -12,22 +12,23 @@ namespace QuickCart.ViewComponents
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<IViewComponentResult>  InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync()
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var claim = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier);
 
             if (claim != null)
             {
-                if(HttpContext.Session.GetInt32(SD.SessionCart) == null)
+                if (HttpContext.Session.GetInt32(SD.SessionCart) == null)
                 {
-                    HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value).Count());
+                    var userCartItems = await _unitOfWork.ShoppingCart.GetAllAsync(u => u.ApplicationUserId == claim.Value);
+                    HttpContext.Session.SetInt32(SD.SessionCart, userCartItems.Count());
                 }
-                return View(HttpContext.Session.GetInt32(SD.SessionCart));
+                return View(HttpContext.Session.GetInt32(SD.SessionCart) ?? 0);
             }
             else
             {
-                HttpContext.Session.Clear();
+                HttpContext.Session.Remove(SD.SessionCart);
                 return View(0);
             }
         }

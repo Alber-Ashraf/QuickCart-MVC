@@ -1,0 +1,21 @@
+@*
+    Enterprise Toast Notification Partial
+    Provides high-contrast HTML toast container and screen reader live region
+*@
+
+<div id="toast-notifications"
+     data-success="@TempData["success"]"
+     data-error="@TempData["error"]"
+     data-warning="@TempData["warning"]"
+     data-info="@TempData["info"]"
+     class="d-none"
+     aria-hidden="true">
+</div>
+
+<!-- WCAG 2.2 AA Screen Reader Announcement Live Region -->
+<div id="qc-live-announcer"
+     class="visually-hidden"
+     aria-live="polite"
+     aria-atomic="true"
+     role="status">
+</div>

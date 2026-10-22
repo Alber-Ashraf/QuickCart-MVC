@@ -9,18 +9,27 @@
     }
 }
 
-<div class="container py-5 text-light bg-dark">
-    <h2 class="mb-4 fw-bold text-light">Manage Your Account</h2>
+<div class="py-2">
+    <div class="qc-page-header mb-4">
+        <div class="page-header-info">
+            <h1 class="page-title">
+                <i class="bi bi-person-gear me-2 text-primary"></i> Account Settings
+            </h1>
+            <p class="page-subtitle">Manage your profile details, security preferences, and personal data.</p>
+        </div>
+    </div>
 
-    <div class="row">
+    <div class="row g-4">
         <!-- Side Navigation -->
-        <div class="col-lg-3 mb-4">
-            <partial name="_ManageNav" />
+        <div class="col-lg-3">
+            <div class="qc-card p-3">
+                <partial name="_ManageNav" />
+            </div>
         </div>
 
         <!-- Main Content -->
-        <div class="col-lg-6">
-            <div class="p-4 rounded-4 shadow" style="background-color: #1e1e1e;">
+        <div class="col-lg-9">
+            <div class="qc-card p-4">
                 @RenderBody()
             </div>
         </div>

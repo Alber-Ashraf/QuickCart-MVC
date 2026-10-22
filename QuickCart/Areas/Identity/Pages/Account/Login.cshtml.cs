@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using QuickCart.Utility;
 
 namespace QuickCart.Areas.Identity.Pages.Account
 {
@@ -84,14 +85,23 @@ namespace QuickCart.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null, string externalLoginError = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
             }
 
-            returnUrl ??= Url.Content("~/");
+            if (!string.IsNullOrEmpty(externalLoginError))
+            {
+                ModelState.AddModelError(string.Empty, externalLoginError);
+            }
+            else if (Request.Query.TryGetValue("ExternalLoginError", out var qErr) && !string.IsNullOrEmpty(qErr))
+            {
+                ModelState.AddModelError(string.Empty, qErr.ToString());
+            }
+
+            returnUrl = SD.CleanReturnUrl(returnUrl);
 
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -103,15 +113,14 @@ namespace QuickCart.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl = SD.CleanReturnUrl(returnUrl);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                // Enforce account lockout protection against automated brute-force attacks
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");

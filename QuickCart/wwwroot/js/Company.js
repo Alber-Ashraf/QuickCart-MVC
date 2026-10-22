@@ -1,73 +1,75 @@
-﻿var dataTable;
+﻿let companyTable;
 
-$(document).ready(function () {
-    loadDataTable();
+$(function () {
+    loadCompanyTable();
 });
-function loadDataTable() {
-    dataTable = $('#tblData').DataTable({
-        "ajax": {
+
+function loadCompanyTable() {
+    companyTable = $('#tblData').DataTable({
+        ajax: {
             url: '/Admin/Company/GetAll',
             dataSrc: 'data'
         },
-        "columns": [
+        columns: [
             {
                 data: 'name',
-                width: "40%",
-                className: "text-nowrap"
+                width: '50%',
+                className: 'fw-semibold text-primary',
+                render: function (data) {
+                    return `
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="empty-state-icon-circle bg-primary-subtle text-primary p-1" style="width: 28px; height: 28px; font-size: 14px;">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <span>${data}</span>
+                    </div>`;
+                }
             },
             {
                 data: 'phone',
-                width: "35%",
-                className: "text-nowrap"
+                width: '30%',
+                className: 'font-mono text-secondary',
+                render: function (data) {
+                    return data ? `<i class="bi bi-telephone text-muted me-1"></i>${data}` : '<span class="text-muted">—</span>';
+                }
             },
             {
                 data: 'id',
-                "render": function (data) {
+                width: '20%',
+                className: 'text-center',
+                orderable: false,
+                render: function (data) {
                     return `
-                    <div class="btn-group w-100 justify-content-center" role="group">
-                        <a href="/Admin/Company/Upsert?id=${data}"
-                           class="btn btn-dark mx-2"> <i class="bi bi-pencil-square"></i> Edit
+                    <div class="d-inline-flex gap-1" role="group">
+                        <a href="/Admin/Company/Upsert?id=${data}" class="btn btn-sm btn-outline-secondary qc-btn-secondary" title="Edit Company">
+                            <i class="bi bi-pencil me-1"></i> Edit
                         </a>
-                        <a onClick="Delete('/Admin/Company/Delete/${data}')"
-                           class="btn btn-danger mx-2"> <i class="bi bi-trash-fill"></i> Delete
-                        </a>
+                        <button type="button" onclick="deleteCompany('/Admin/Company/Delete/${data}')" class="btn btn-sm btn-outline-danger" title="Delete Company">
+                            <i class="bi bi-trash3"></i>
+                        </button>
                     </div>`;
-                },
-                "width": "25%",
-                className: "text-nowrap"
+                }
             }
         ],
         responsive: true,
         language: {
-            emptyTable: "No companies available",
-            search: "_INPUT_",
-            searchPlaceholder: "Search companies..."
+            emptyTable: 'No corporate accounts registered',
+            search: '',
+            searchPlaceholder: 'Search companies...',
+            paginate: {
+                previous: '<i class="bi bi-chevron-left"></i>',
+                next: '<i class="bi bi-chevron-right"></i>'
+            }
         }
     });
 }
 
-function Delete(url) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: url,
-                type: 'DELETE',
-                success: function (data) {
-                    dataTable.ajax.reload();
-                    toastr.success(data.message);
-                },
-                error: function () {
-                    toastr.error("Something went wrong while deleting.");
-                }
-            });
-        }
+function deleteCompany(url) {
+    window.qcDeleteRecord({
+        url: url,
+        table: companyTable,
+        title: 'Delete this corporate account?',
+        text: 'This will remove company billing configurations and associated user affiliations.',
+        successMsg: 'Corporate account deleted successfully.'
     });
 }

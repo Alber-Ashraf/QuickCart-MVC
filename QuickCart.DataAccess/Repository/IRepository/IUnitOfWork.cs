@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
@@ -20,6 +18,7 @@ namespace QuickCart.DataAccess.Repository.IRepository
         IRepository<IdentityRole> Roles { get; }
         IRepository<IdentityUserRole<string>> UserRoles { get; }
 
-        public void Save();
+        void Save();
+        Task<int> SaveAsync(CancellationToken cancellationToken = default);
     }
 }

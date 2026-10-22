@@ -1,5 +1,5 @@
 /* Google Font */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 /* Global Styles */
 html {
@@ -16,7 +16,8 @@ html {
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f8f9fa;
+    background-color: var(--qc-bg-body, #f8f9fa);
+    color: var(--qc-text-primary, #212529);
     margin-bottom: 60px;
 }
 
@@ -24,61 +25,68 @@ body {
 .btn:focus, .btn:active:focus,
 .btn-link.nav-link:focus,
 .form-control:focus,
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #0dcaf0;
+.form-check-input:focus,
+.form-select:focus {
+    box-shadow: var(--qc-shadow-focus, 0 0 0 0.25rem rgba(13, 202, 240, 0.4));
+    border-color: var(--qc-accent, #0dcaf0);
 }
 
 /* Transitions */
 .transition, .nav-link, .btn, .card, .dropdown-menu a {
-    transition: all 0.3s ease-in-out;
+    transition: all var(--qc-transition-normal, 0.25s ease-in-out);
 }
 
-
 .navbar-brand {
-    font-weight: bold;
+    font-weight: 700;
     letter-spacing: 0.5px;
 }
 
 .navbar .nav-link,
 .nav-link {
-    border-radius: 0.5rem;
-    color: #000;
+    border-radius: var(--qc-radius-md, 0.5rem);
 }
 
-    .navbar .nav-link:hover,
-    .nav-link:hover,
-    .dropdown-menu a:hover {
-        color: #0dcaf0 !important;
-    }
+.navbar .nav-link:hover,
+.nav-link:hover,
+.dropdown-menu a:hover {
+    color: var(--qc-accent, #0dcaf0) !important;
+}
 
-    .nav-link.active {
-        background-color: #ffc107 !important;
-        color: #000 !important;
-        font-weight: bold;
-    }
+.nav-link.active {
+    background-color: var(--qc-warning, #ffc107) !important;
+    color: #000 !important;
+    font-weight: 600;
+}
 
-/* Buttons */
+/* Custom Buttons & Hover */
 .btn-custom {
     background: linear-gradient(135deg, #0d6efd, #6610f2);
     color: white;
     border: none;
-    border-radius: 0.5rem;
-    transition: 0.3s ease-in-out;
+    border-radius: var(--qc-radius-md, 0.5rem);
+    transition: var(--qc-transition-normal, 0.25s ease-in-out);
 }
 
-    .btn-custom:hover {
-        background: linear-gradient(135deg, #6610f2, #0d6efd);
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-    }
+.btn-custom:hover {
+    background: linear-gradient(135deg, #6610f2, #0d6efd);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.35);
+    color: #ffffff;
+}
 
 .hover-shadow:hover {
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: var(--qc-shadow-md) !important;
 }
 
 /* Cards */
+.card {
+    background-color: var(--qc-bg-card, #ffffff);
+    border-color: var(--qc-border-subtle, #e9ecef);
+    transition: transform var(--qc-transition-fast), box-shadow var(--qc-transition-fast);
+}
+
 .card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--qc-shadow-md);
 }
 
 /* Preloader */
@@ -100,37 +108,119 @@ body {
     gap: 10px;
 }
 
-    .dot-loader span {
-        display: inline-block;
-        background: #0dcaf0;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        animation: bounce 0.6s infinite alternate;
-    }
+.dot-loader span {
+    display: inline-block;
+    background: var(--qc-accent, #0dcaf0);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: bounce 0.6s infinite alternate;
+}
 
-        .dot-loader span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
+.dot-loader span:nth-child(2) {
+    animation-delay: 0.2s;
+}
 
-        .dot-loader span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
+.dot-loader span:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes bounce {
     from {
         transform: translateY(0);
         opacity: 0.5;
     }
-
     to {
         transform: translateY(-10px);
-        opacity: 0.5;
+        opacity: 1;
     }
 }
 
 /* Footer */
 .footer em {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #adb5bd;
+}
+
+/* ==========================================================================
+   Four Mandatory UX State Components
+   ========================================================================== */
+
+/* 1. Loading & Submitting State */
+.btn.is-submitting {
+    pointer-events: none;
+    opacity: 0.75;
+    position: relative;
+}
+
+.btn .spinner-border-sm {
+    vertical-align: -0.125em;
+    margin-right: 0.5rem;
+}
+
+/* 2. Empty State Pattern */
+.empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    background: var(--qc-bg-surface, #ffffff);
+    border: 1px dashed var(--qc-border-color, #dee2e6);
+    border-radius: var(--qc-radius-lg, 1rem);
+}
+
+.empty-state-icon {
+    font-size: 3.5rem;
+    color: var(--qc-text-muted, #6c757d);
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.empty-state-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--qc-text-primary, #212529);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-description {
+    font-size: 0.95rem;
+    color: var(--qc-text-secondary, #495057);
+    max-width: 480px;
+    margin: 0 auto 1.5rem auto;
+}
+
+/* 3. Status Badges */
+.qc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35em 0.75em;
+    font-size: 0.825rem;
+    font-weight: 600;
+    border-radius: var(--qc-radius-pill, 50rem);
+    letter-spacing: 0.02em;
+}
+
+.qc-badge-pending {
+    background-color: var(--qc-warning-bg, #fff3cd);
+    color: var(--qc-warning-text, #664d03);
+}
+
+.qc-badge-approved {
+    background-color: var(--qc-info-bg, #cff4fc);
+    color: var(--qc-info-text, #055160);
+}
+
+.qc-badge-inprocess {
+    background-color: #e2d9f3;
+    color: #491297;
+}
+
+.qc-badge-shipped {
+    background-color: var(--qc-success-bg, #d1e7dd);
+    color: var(--qc-success-text, #0f5132);
+}
+
+.qc-badge-cancelled {
+    background-color: var(--qc-danger-bg, #f8d7da);
+    color: var(--qc-danger-text, #842029);
 }

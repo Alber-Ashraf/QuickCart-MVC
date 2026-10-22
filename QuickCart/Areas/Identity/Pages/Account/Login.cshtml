@@ -3,69 +3,135 @@
 
 @{
     ViewData["Title"] = "Log in";
+    Layout = "/Views/Shared/_AuthLayout.cshtml";
 }
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card shadow-lg border-0 rounded-4 p-4" style="max-width: 600px; width: 100%;">
-        <div class="card-body">
-            <h2 class="text-center text-dark mb-4">Welcome Back</h2>
-            <h5 class="text-center mb-4">Login to your account</h5>
+<div class="auth-card-content">
+    <div class="text-center mb-4">
+        <img src="~/favicon.svg" alt="Flyleaf Logo" width="48" height="48" class="rounded-3 shadow-sm mx-auto mb-2" />
+        <h2 class="fs-4 fw-bold text-primary mb-1">Welcome back</h2>
+        <p class="text-muted small mb-0">Sign in to your Flyleaf workspace to continue.</p>
+    </div>
 
-            <form id="account" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+    {
+        <div class="alert alert-danger d-flex align-items-center mb-3 py-2 px-3 small" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+            <div>
+                @foreach (var error in ViewData.ModelState[string.Empty]!.Errors)
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
+        </div>
+    }
 
-                <!-- Email -->
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
+    <form id="account" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
 
-                <!-- Password -->
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
+        <!-- Email -->
+        <div class="mb-3">
+            <label asp-for="Input.Email" class="form-label small fw-semibold text-secondary">
+                Email Address
+            </label>
+            <div class="input-icon-group">
+                <i class="bi bi-envelope input-prefix-icon"></i>
+                <input asp-for="Input.Email"
+                       class="form-control qc-input"
+                       autocomplete="username"
+                       aria-required="true"
+                       placeholder="name@company.com"
+                       autofocus />
+            </div>
+            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+        </div>
 
-                <!-- Remember Me -->
-                <div class="form-check mb-3">
-                    <input class="form-check-input" asp-for="Input.RememberMe" />
-                    <label class="form-check-label" asp-for="Input.RememberMe">
-                        @Html.DisplayNameFor(m => m.Input.RememberMe)
-                    </label>
-                </div>
+        <!-- Password -->
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <label asp-for="Input.Password" class="form-label small fw-semibold text-secondary mb-0">
+                    Password
+                </label>
+                <a id="forgot-password" asp-page="./ForgotPassword" class="small text-primary text-decoration-none">
+                    Forgot password?
+                </a>
+            </div>
+            <div class="input-icon-group">
+                <i class="bi bi-lock input-prefix-icon"></i>
+                <input asp-for="Input.Password"
+                       type="password"
+                       class="form-control qc-input"
+                       autocomplete="current-password"
+                       aria-required="true"
+                       placeholder="••••••••" />
+            </div>
+            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+        </div>
 
-                <!-- Submit -->
-                <button id="login-submit" type="submit" class="btn btn-dark w-100 mb-3">
-                    <i class="bi bi-box-arrow-in-right me-1"></i> Log in
-                </button>
+        <!-- Remember Me Checkbox -->
+        <div class="form-check mb-4">
+            <input class="form-check-input" asp-for="Input.RememberMe" id="rememberMeCheck" />
+            <label class="form-check-label small text-secondary" for="rememberMeCheck">
+                Remember this device for 30 days
+            </label>
+        </div>
 
-                <!-- Links -->
-                <div class="text-center">
-                    <a id="forgot-password" asp-page="./ForgotPassword" class="d-block mb-1 text-decoration-none">Forgot your password?</a>
-                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="d-block mb-1 text-decoration-none">Register as a new user</a>
-                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="d-block text-decoration-none">Resend email confirmation</a>
+        <!-- Submit Button -->
+        <button id="login-submit"
+                type="submit"
+                class="btn btn-primary qc-btn-primary w-100 py-2 justify-content-center"
+                data-loading-text="Authenticating...">
+            <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Account
+        </button>
+
+        <!-- Secondary Navigation -->
+        <div class="text-center mt-4 pt-3 border-top border-subtle small text-muted">
+            Don't have an account yet?
+            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-primary fw-semibold text-decoration-none ms-1">
+                Create one now
+            </a>
+        </div>
+    </form>
+
+    <!-- External Providers (if configured) -->
+    @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+    {
+        <div class="mt-4 pt-3 border-top border-subtle text-center">
+            <span class="small text-muted d-block mb-3">Or sign in with external single sign-on:</span>
+            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var provider in Model.ExternalLogins!)
+                    {
+                        <button type="submit" class="btn btn-outline-secondary qc-btn-secondary w-100 justify-content-center no-spinner"
+                                name="provider" value="@provider.Name"
+                                asp-page="./ExternalLogin" asp-route-provider="@provider.Name" asp-route-returnUrl="@Model.ReturnUrl">
+                            @if (provider.Name.Equals("Google", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <svg class="me-2" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                                </svg>
+                                <span>Continue with Google</span>
+                            }
+                            else if (provider.Name.Equals("Facebook", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <i class="bi bi-facebook me-2 text-primary fs-6" aria-hidden="true"></i>
+                                <span>Continue with Facebook</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-shield-check me-2" aria-hidden="true"></i>
+                                <span>Continue with @provider.DisplayName</span>
+                            }
+                        </button>
+                    }
                 </div>
             </form>
-
-            @if ((Model.ExternalLogins?.Count ?? 0) > 0)
-            {
-                <hr class="my-4" />
-                <div class="text-center">
-                    <h6 class="mb-3">Or log in using:</h6>
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                        @foreach (var provider in Model.ExternalLogins!)
-                        {
-                            <button type="submit" class="btn btn-outline-secondary w-100 mb-2" name="provider" value="@provider.Name">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> @provider.DisplayName
-                            </button>
-                        }
-                    </form>
-                </div>
-            }
         </div>
-    </div>
+    }
 </div>
 
 @section Scripts {

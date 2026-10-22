@@ -100,6 +100,23 @@ namespace QuickCart.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostLinkLoginAsync(string provider)
         {
+            provider ??= (Request.HasFormContentType && Request.Form.TryGetValue("provider", out var fp) ? fp.ToString() : null)
+                ?? (Request.Query.TryGetValue("provider", out var qp) ? qp.ToString() : null);
+
+            if (string.IsNullOrWhiteSpace(provider))
+            {
+                var schemes = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                if (schemes.Count == 1)
+                {
+                    provider = schemes[0].Name;
+                }
+                else
+                {
+                    StatusMessage = "Error: Provider was not specified.";
+                    return RedirectToPage();
+                }
+            }
+
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 

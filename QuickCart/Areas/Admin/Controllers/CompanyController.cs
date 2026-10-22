@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using QuickCart.DataAccess.Repository.IRepository;
 using QuickCart.Models;
-using QuickCart.Models.ViewModels;
 using QuickCart.Utility;
 
 namespace QuickCart.Areas.Admin.Controllers
@@ -14,97 +12,85 @@ namespace QuickCart.Areas.Admin.Controllers
     public class CompanyController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public CompanyController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public CompanyController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _webHostEnvironment = webHostEnvironment;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            // Fetch the list of Companys from the database
-            List<Company> objCompanyList = _unitOfWork.Company.GetAll().ToList();
-            // Pass the list to the View
-            return View(objCompanyList);
+            var companyList = await _unitOfWork.Company.GetAllAsync();
+            return View(companyList);
         }
-        public IActionResult Upsert(int? id)
+
+        public async Task<IActionResult> Upsert(int? id)
         {
-            // Fetch Category Name and Id            
-            
             if (id == null || id == 0)
             {
-                // Return the view for creating a new Company
                 return View(new Company());
             }
-            else
+
+            var company = await _unitOfWork.Company.GetAsync(u => u.Id == id);
+            if (company == null)
             {
-                Company company = _unitOfWork.Company.Get(u => u.Id == id);
-                return View(company);
+                return NotFound();
             }
+
+            return View(company);
         }
+
         [HttpPost]
-        public IActionResult Upsert(Company company, int? id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upsert(Company company)
         {
             if (ModelState.IsValid)
             {
                 if (company.Id == 0)
                 {
-                    _unitOfWork.Company.Add(company);
+                    await _unitOfWork.Company.AddAsync(company);
+                    TempData["success"] = "Company created successfully!";
                 }
                 else
                 {
-                    var companyFromDb = _unitOfWork.Company.Get(u => u.Id == company.Id);
-                    if (companyFromDb != null)
-                    {
-                        // Update the existing Company in the database
-                        _unitOfWork.Company.Update(company);
-
-                    }
+                    _unitOfWork.Company.Update(company);
+                    TempData["success"] = "Company updated successfully!";
                 }
 
-                _unitOfWork.Save();
-                TempData["success"] = "Company saved successfully!";
-                return RedirectToAction("Index");
+                await _unitOfWork.SaveAsync();
+                return RedirectToAction(nameof(Index));
             }
-            // If model state is not valid, return the view with the current model
-            else
-            {
-                return View(company);
-            }
+
+            return View(company);
         }
 
-
-        // This method is used to get the list of Companys in JSON format for DataTables
-        #region ApI Calls
+        #region API Calls
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            // Fetch the list of Companys from the database
-            List<Company> objCompanyList = _unitOfWork.Company.GetAll().ToList();
-            // Return the list as JSON
-            return Json(new { data = objCompanyList });
+            var companyList = await _unitOfWork.Company.GetAllAsync();
+            return Json(new { data = companyList });
         }
 
-        // This method is used to get the details of a specific Company for editing
         [HttpDelete]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            var companyToBeDeleted = _unitOfWork.Company.Get(u => u.Id == id);
-            if (companyToBeDeleted == null)
+            if (id == null || id == 0)
             {
-                return Json(new { sucess = false, massege = "Erorr While Deleting" });
+                return Json(new { success = false, message = "Invalid company identifier." });
             }
 
-            // Remove the Company from the database
-            _unitOfWork.Company.Remove(companyToBeDeleted);
-            _unitOfWork.Save();
+            var company = await _unitOfWork.Company.GetAsync(u => u.Id == id, tracked: true);
+            if (company == null)
+            {
+                return Json(new { success = false, message = "Company not found." });
+            }
 
-            return Json(new { sucess = true, massege = "Delete Sucsess" });
+            _unitOfWork.Company.Remove(company);
+            await _unitOfWork.SaveAsync();
+
+            return Json(new { success = true, message = "Company deleted successfully." });
         }
         #endregion
-
     }
 }
-

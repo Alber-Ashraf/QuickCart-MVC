@@ -1,16 +1,41 @@
 ﻿@model int
 
-<div class="container py-5 text-center">
-    <p class="lead">Payment has been applied successfully!</p>
+@{
+    ViewData["Title"] = "Payment Confirmation";
+}
 
-    @if (@Model != null)
-    {
-        <p>Your order ID is: <strong>@Model</strong></p>
-    }
+@section Breadcrumbs {
+    <a asp-area="Admin" asp-controller="Order" asp-action="Index">Orders</a>
+    <span class="separator">/</span>
+    <span class="current">Payment Confirmation</span>
+}
 
-    <div class="mt-4">
-        <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-orderId="@Model" class="btn btn-primary">
-            Back to Order Details
-        </a>
+<div class="confirmation-container py-5 d-flex justify-content-center">
+    <div class="qc-card p-5 text-center shadow-sm" style="max-width: 580px; width: 100%;">
+        <div class="mb-4">
+            <div class="empty-state-icon-circle mx-auto bg-success-subtle text-success" style="width: 76px; height: 76px;">
+                <i class="bi bi-credit-card-2-front-fill fs-1"></i>
+            </div>
+        </div>
+
+        <h1 class="h3 fw-bold text-primary mb-2">Payment Succeeded</h1>
+        <p class="text-muted mb-4">
+            The corporate invoice payment has been successfully captured and registered. Order status is updated to Approved.
+        </p>
+
+        <div class="p-3 bg-subtle rounded-3 border border-subtle mb-4">
+            <span class="text-muted small text-uppercase fw-bold letter-spacing-wide d-block">
+                Order Reference
+            </span>
+            <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
+                <span class="fs-4 font-mono fw-bold text-primary">#@Model</span>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-orderId="@Model" class="btn btn-primary qc-btn-primary">
+                <i class="bi bi-receipt me-1"></i> Return to Order Details
+            </a>
+        </div>
     </div>
 </div>
